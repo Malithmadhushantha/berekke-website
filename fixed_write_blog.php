@@ -761,4 +761,8 @@ window.addEventListener('beforeunload', function(e) {
 document.getElementById('blogForm')?.addEventListener('submit', () => hasUnsavedChanges = false);
 </script>
 
-<?php include 'includes/footer.php'; ?>
+<?php include 'includes/footer.php';    ?>
+<?php
+// End of fixed_write_blog.php
+// Ensure to close the PHP tag if you are mixing HTML and PHP
+?>

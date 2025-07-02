@@ -1,5 +1,5 @@
 <!-- Footer -->
-    <footer class="bg-dark text-light mt-5">
+    <footer class="bg-dark text-blue mt-5">
         <div class="container py-5">
             <div class="row">
                 <div class="col-lg-4 mb-4">
@@ -7,49 +7,49 @@
                         <img src="assets/images/logo.png" alt="Logo" style="height: 30px;" class="me-2">
                         Berekke Website
                     </h5>
-                    <p class="text-muted">
+                    <p class="text-light">
                         Sri Lankan Police officers සඳහා නිර්මාණය කළ විශේෂ වෙබ් අඩවියකි. 
                         නීතිමය ප්‍රලේඛන, මෙවලම් සහ අවශ්‍ය සියලුම තොරතුරු සඳහා ඔබගේ විශ්වසනීය මූලාශ්‍රය.
                     </p>
                     <div class="d-flex">
-                        <a href="#" class="text-light me-3"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="text-light me-3"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-light me-3"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#" class="text-light"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="text-blue me-3"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-blue me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-blue me-3"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="text-blue"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
                 
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h6 class="text-white mb-3">Quick Links</h6>
                     <ul class="list-unstyled">
-                        <li><a href="index.php" class="text-muted text-decoration-none">Home</a></li>
-                        <li><a href="about_us.php" class="text-muted text-decoration-none">About Us</a></li>
-                        <li><a href="blogs.php" class="text-muted text-decoration-none">Blogs</a></li>
-                        <li><a href="downloads.php" class="text-muted text-decoration-none">Downloads</a></li>
+                        <li><a href="index.php" class="text-blue text-decoration-none">Home</a></li>
+                        <li><a href="about_us.php" class="text-blue text-decoration-none">About Us</a></li>
+                        <li><a href="blogs.php" class="text-blue text-decoration-none">Blogs</a></li>
+                        <li><a href="downloads.php" class="text-blue text-decoration-none">Downloads</a></li>
                     </ul>
                 </div>
                 
                 <div class="col-lg-3 col-md-6 mb-4">
                     <h6 class="text-white mb-3">Legal Resources</h6>
                     <ul class="list-unstyled">
-                        <li><a href="penal_code.php" class="text-muted text-decoration-none">Penal Code</a></li>
-                        <li><a href="criminal_procedure_code_act.php" class="text-muted text-decoration-none">Criminal Procedure Code</a></li>
-                        <li><a href="evidence_ordinance.php" class="text-muted text-decoration-none">Evidence Ordinance</a></li>
+                        <li><a href="penal_code.php" class="text-blue text-decoration-none">Penal Code</a></li>
+                        <li><a href="criminal_procedure_code_act.php" class="text-blue text-decoration-none">Criminal Procedure Code</a></li>
+                        <li><a href="evidence_ordinance.php" class="text-blue text-decoration-none">Evidence Ordinance</a></li>
                     </ul>
                 </div>
                 
                 <div class="col-lg-3 mb-4">
                     <h6 class="text-white mb-3">Contact Info</h6>
                     <ul class="list-unstyled">
-                        <li class="text-muted mb-2">
+                        <li class="text-success mb-2">
                             <i class="fas fa-map-marker-alt me-2"></i>
                             Colombo, Sri Lanka
                         </li>
-                        <li class="text-muted mb-2">
+                        <li class="text-success mb-2">
                             <i class="fas fa-envelope me-2"></i>
                             info@berekke.lk
                         </li>
-                        <li class="text-muted mb-2">
+                        <li class="text-success mb-2">
                             <i class="fas fa-phone me-2"></i>
                             +94 11 234 5678
                         </li>
@@ -61,13 +61,13 @@
             
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <p class="text-muted mb-0">
+                    <p class="text-info mb-0">
                         &copy; <?php echo date('Y'); ?> Berekke Website. All rights reserved.
                     </p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <a href="#" class="text-muted text-decoration-none me-3">Privacy Policy</a>
-                    <a href="#" class="text-muted text-decoration-none">Terms of Service</a>
+                    <a href="#" class="text-info text-decoration-none me-3">Privacy Policy</a>
+                    <a href="#" class="text-info text-decoration-none">Terms of Service</a>
                 </div>
             </div>
         </div>

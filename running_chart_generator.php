@@ -10,7 +10,20 @@ if (!isLoggedIn()) {
 }
 
 $user = getUserInfo();
-$page_title = "Running Chart Generator";
+
+// Get user's vehicles count
+$stmt = $pdo->prepare("SELECT COUNT(*) as total_vehicles, 
+                              SUM(CASE WHEN is_primary = 1 THEN 1 ELSE 0 END) as primary_vehicles 
+                       FROM vehicles WHERE user_id = ? AND status = 'active'");
+$stmt->execute([$_SESSION['user_id']]);
+$vehicle_stats = $stmt->fetch();
+
+// Get recent trip entries
+$stmt = $pdo->prepare("SELECT COUNT(*) as total_trips FROM trip_entries WHERE user_id = ?");
+$stmt->execute([$_SESSION['user_id']]);
+$trip_stats = $stmt->fetch();
+
+$page_title = "Vehicle Running Chart System";
 include 'includes/header.php';
 ?>
 
@@ -22,253 +35,229 @@ include 'includes/header.php';
                 <div class="row align-items-center">
                     <div class="col-lg-8">
                         <h1 class="h2 mb-2">
-                            <i class="fas fa-chart-line me-3"></i>
-                            Welcome to Berekke Running Chart Generator
+                            <i class="fas fa-car me-3"></i>
+                            Vehicle Running Chart System
                         </h1>
                         <p class="mb-0 opacity-75">
                             Hi <?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?>! 
-                            Create visual timelines, analytics charts, and case progression diagrams for investigations.
+                            Manage your vehicle logbooks, track fuel consumption, and calculate running charts for company vehicles.
                         </p>
                     </div>
                     <div class="col-lg-4 text-end">
-                        <i class="fas fa-chart-bar fa-4x opacity-50"></i>
+                        <i class="fas fa-tachometer-alt fa-4x opacity-50"></i>
                     </div>
                 </div>
             </div>
 
-            <!-- Chart Templates -->
+            <!-- Main Navigation Buttons -->
+            <div class="row g-4 mb-5">
+                <!-- Running Chart Button -->
+                <div class="col-lg-6 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm hover-card">
+                        <div class="card-body p-4 text-center">
+                            <div class="feature-icon bg-primary text-white rounded-circle mx-auto mb-3" 
+                                 style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-chart-line fa-2x"></i>
+                            </div>
+                            <h4 class="card-title mb-3">Running Chart</h4>
+                            <p class="card-text text-muted mb-4">
+                                Calculate fuel consumption, track mileage, and maintain detailed trip records for your primary vehicle.
+                            </p>
+                            <a href="running_chart.php" class="btn btn-primary btn-lg px-4">
+                                <i class="fas fa-calculator me-2"></i>Open Running Chart
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Vehicle Button -->
+                <div class="col-lg-6 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm hover-card">
+                        <div class="card-body p-4 text-center">
+                            <div class="feature-icon bg-success text-white rounded-circle mx-auto mb-3" 
+                                 style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-plus-circle fa-2x"></i>
+                            </div>
+                            <h4 class="card-title mb-3">Add Vehicle</h4>
+                            <p class="card-text text-muted mb-4">
+                                Register new vehicles, manage vehicle details, and set up your fleet for tracking and monitoring.
+                            </p>
+                            <a href="add_vehicle.php" class="btn btn-success btn-lg px-4">
+                                <i class="fas fa-car me-2"></i>Manage Vehicles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Entries Button -->
+                <div class="col-lg-6 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm hover-card">
+                        <div class="card-body p-4 text-center">
+                            <div class="feature-icon bg-info text-white rounded-circle mx-auto mb-3" 
+                                 style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-list-alt fa-2x"></i>
+                            </div>
+                            <h4 class="card-title mb-3">My Entries</h4>
+                            <p class="card-text text-muted mb-4">
+                                View and manage all your trip entries, review historical data, and export logbook records.
+                            </p>
+                            <a href="entry_viwe_page.php" class="btn btn-info btn-lg px-4">
+                                <i class="fas fa-history me-2"></i>View Entries
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- R/C Calculator Button -->
+                <div class="col-lg-6 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm hover-card">
+                        <div class="card-body p-4 text-center">
+                            <div class="feature-icon bg-warning text-white rounded-circle mx-auto mb-3" 
+                                 style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-calculator fa-2x"></i>
+                            </div>
+                            <h4 class="card-title mb-3">R/C Calculator</h4>
+                            <p class="card-text text-muted mb-4">
+                                Perform quick calculations for fuel consumption, distance planning, and cost analysis.
+                            </p>
+                            <a href="rc_calculator.php" class="btn btn-warning btn-lg px-4">
+                                <i class="fas fa-calculator me-2"></i>Open Calculator
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Statistics -->
             <div class="row g-4 mb-5">
                 <div class="col-12">
-                    <h3 class="mb-4">Chart Templates</h3>
+                    <h3 class="mb-4">
+                        <i class="fas fa-tachometer-alt me-2"></i>
+                        Dashboard Overview
+                    </h3>
                 </div>
                 
-                <!-- Timeline Chart -->
-                <div class="col-lg-6 col-md-6">
-                    <div class="card h-100 border-0 shadow-sm hover-card">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="feature-icon bg-primary text-white rounded-circle me-3" 
-                                     style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-clock"></i>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="d-flex align-items-center justify-content-center mb-3">
+                                <div class="bg-primary text-white rounded-circle" 
+                                     style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-car fa-2x"></i>
                                 </div>
-                                <h5 class="card-title mb-0">Case Timeline</h5>
                             </div>
-                            <p class="card-text text-muted mb-4">
-                                Create chronological timelines of case events, evidence collection, and investigation milestones.
-                            </p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="badge bg-success">Popular</span>
-                                <button class="btn btn-primary btn-sm" onclick="createChart('timeline')">
-                                    <i class="fas fa-plus me-1"></i>Create
-                                </button>
-                            </div>
+                            <h4 class="text-primary mb-1"><?php echo $vehicle_stats['total_vehicles']; ?></h4>
+                            <p class="text-muted mb-0">Total Vehicles</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Crime Statistics -->
-                <div class="col-lg-6 col-md-6">
-                    <div class="card h-100 border-0 shadow-sm hover-card">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="feature-icon bg-success text-white rounded-circle me-3" 
-                                     style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-chart-pie"></i>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="d-flex align-items-center justify-content-center mb-3">
+                                <div class="bg-success text-white rounded-circle" 
+                                     style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-star fa-2x"></i>
                                 </div>
-                                <h5 class="card-title mb-0">Crime Statistics</h5>
                             </div>
-                            <p class="card-text text-muted mb-4">
-                                Generate statistical charts for crime patterns, frequency analysis, and trend visualization.
-                            </p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="badge bg-success">Available</span>
-                                <button class="btn btn-success btn-sm" onclick="createChart('statistics')">
-                                    <i class="fas fa-chart-pie me-1"></i>Generate
-                                </button>
-                            </div>
+                            <h4 class="text-success mb-1"><?php echo $vehicle_stats['primary_vehicles']; ?></h4>
+                            <p class="text-muted mb-0">Primary Vehicle</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Evidence Flow -->
-                <div class="col-lg-6 col-md-6">
-                    <div class="card h-100 border-0 shadow-sm hover-card">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="feature-icon bg-warning text-white rounded-circle me-3" 
-                                     style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-project-diagram"></i>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="d-flex align-items-center justify-content-center mb-3">
+                                <div class="bg-info text-white rounded-circle" 
+                                     style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-route fa-2x"></i>
                                 </div>
-                                <h5 class="card-title mb-0">Evidence Flow Chart</h5>
                             </div>
-                            <p class="card-text text-muted mb-4">
-                                Map evidence collection, chain of custody, and analysis workflows in visual diagrams.
-                            </p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="badge bg-success">Available</span>
-                                <button class="btn btn-warning btn-sm" onclick="createChart('evidence-flow')">
-                                    <i class="fas fa-sitemap me-1"></i>Map
-                                </button>
-                            </div>
+                            <h4 class="text-info mb-1"><?php echo $trip_stats['total_trips']; ?></h4>
+                            <p class="text-muted mb-0">Total Trips</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Incident Reports -->
-                <div class="col-lg-6 col-md-6">
-                    <div class="card h-100 border-0 shadow-sm hover-card">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="feature-icon bg-danger text-white rounded-circle me-3" 
-                                     style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-chart-area"></i>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="d-flex align-items-center justify-content-center mb-3">
+                                <div class="bg-warning text-white rounded-circle" 
+                                     style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-calendar-day fa-2x"></i>
                                 </div>
-                                <h5 class="card-title mb-0">Incident Analysis</h5>
                             </div>
-                            <p class="card-text text-muted mb-4">
-                                Analyze incident patterns, geographic distribution, and temporal trends with dynamic charts.
-                            </p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="badge bg-success">Available</span>
-                                <button class="btn btn-danger btn-sm" onclick="createChart('incident-analysis')">
-                                    <i class="fas fa-chart-area me-1"></i>Analyze
-                                </button>
-                            </div>
+                            <h4 class="text-warning mb-1"><?php echo date('d'); ?></h4>
+                            <p class="text-muted mb-0">Today</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Quick Chart Builder -->
+            <!-- Quick Actions -->
             <div class="row">
                 <div class="col-12">
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
-                                <i class="fas fa-magic me-2"></i>
-                                Quick Chart Builder
+                                <i class="fas fa-bolt me-2"></i>
+                                Quick Actions
                             </h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label fw-semibold">Chart Type</label>
-                                    <select class="form-select" id="chartType">
-                                        <option value="line">Line Chart</option>
-                                        <option value="bar">Bar Chart</option>
-                                        <option value="pie">Pie Chart</option>
-                                        <option value="timeline">Timeline</option>
-                                        <option value="area">Area Chart</option>
-                                        <option value="scatter">Scatter Plot</option>
-                                    </select>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center p-3 border rounded">
+                                        <i class="fas fa-plus text-primary me-3 fa-2x"></i>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">Add New Trip Entry</h6>
+                                            <small class="text-muted">Record a new journey in your logbook</small>
+                                        </div>
+                                        <a href="running_chart.php" class="btn btn-sm btn-outline-primary">
+                                            Add Trip
+                                        </a>
+                                    </div>
                                 </div>
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label fw-semibold">Data Source</label>
-                                    <select class="form-select" id="dataSource">
-                                        <option value="manual">Manual Entry</option>
-                                        <option value="csv">CSV Upload</option>
-                                        <option value="database">Database Query</option>
-                                        <option value="case-data">Case Data</option>
-                                    </select>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center p-3 border rounded">
+                                        <i class="fas fa-car text-success me-3 fa-2x"></i>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">Register New Vehicle</h6>
+                                            <small class="text-muted">Add a new vehicle to your fleet</small>
+                                        </div>
+                                        <a href="add_vehicle.php" class="btn btn-sm btn-outline-success">
+                                            Add Vehicle
+                                        </a>
+                                    </div>
                                 </div>
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label fw-semibold">Time Period</label>
-                                    <select class="form-select" id="timePeriod">
-                                        <option value="week">Last Week</option>
-                                        <option value="month">Last Month</option>
-                                        <option value="quarter">Last Quarter</option>
-                                        <option value="year">Last Year</option>
-                                        <option value="custom">Custom Range</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="text-center">
-                                <button class="btn btn-primary btn-lg" onclick="generateQuickChart()">
-                                    <i class="fas fa-chart-line me-2"></i>
-                                    Generate Chart
-                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Recent Charts -->
+            <!-- System Information -->
             <div class="row mt-5">
                 <div class="col-12">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">
-                                <i class="fas fa-history me-2"></i>
-                                Recent Charts
-                            </h5>
-                            <button class="btn btn-sm btn-outline-primary">View All</button>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <div class="chart-preview border rounded p-3">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <i class="fas fa-chart-line text-primary me-2"></i>
-                                            <h6 class="mb-0">Case Progress Timeline</h6>
-                                        </div>
-                                        <small class="text-muted">Created 2 hours ago</small>
-                                        <div class="mt-2">
-                                            <button class="btn btn-sm btn-outline-primary me-1">Edit</button>
-                                            <button class="btn btn-sm btn-outline-success">Export</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <div class="chart-preview border rounded p-3">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <i class="fas fa-chart-pie text-success me-2"></i>
-                                            <h6 class="mb-0">Crime Type Distribution</h6>
-                                        </div>
-                                        <small class="text-muted">Created 1 day ago</small>
-                                        <div class="mt-2">
-                                            <button class="btn btn-sm btn-outline-primary me-1">Edit</button>
-                                            <button class="btn btn-sm btn-outline-success">Export</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <div class="chart-preview border rounded p-3">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <i class="fas fa-chart-bar text-warning me-2"></i>
-                                            <h6 class="mb-0">Monthly Incident Report</h6>
-                                        </div>
-                                        <small class="text-muted">Created 3 days ago</small>
-                                        <div class="mt-2">
-                                            <button class="btn btn-sm btn-outline-primary me-1">Edit</button>
-                                            <button class="btn btn-sm btn-outline-success">Export</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-info-circle me-2"></i>
+                            How to Use the Vehicle Running Chart System
+                        </h6>
+                        <hr>
+                        <ol class="mb-0">
+                            <li><strong>Add Vehicle:</strong> Start by registering your vehicles with all necessary details</li>
+                            <li><strong>Set Primary Vehicle:</strong> Designate one vehicle as primary for quick access</li>
+                            <li><strong>Running Chart:</strong> Use the running chart to calculate fuel consumption and track trips</li>
+                            <li><strong>View Entries:</strong> Review all your recorded trips and generate reports</li>
+                            <li><strong>Calculator:</strong> Use the R/C calculator for quick fuel and distance calculations</li>
+                        </ol>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Chart Builder Modal -->
-<div class="modal fade" id="chartBuilderModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="chartModalTitle">Chart Builder</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="chartModalBody" style="height: 70vh; overflow-y: auto;">
-                <!-- Chart builder content will be loaded here -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save Chart</button>
-                <button type="button" class="btn btn-success">Export</button>
             </div>
         </div>
     </div>
@@ -292,14 +281,12 @@ include 'includes/header.php';
     transform: scale(1.1);
 }
 
-.chart-preview {
+.card.border-0 {
     transition: all 0.3s ease;
-    cursor: pointer;
 }
 
-.chart-preview:hover {
-    border-color: var(--bs-primary) !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+.card.border-0:hover {
+    box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.1) !important;
 }
 
 @media (max-width: 768px) {
@@ -307,250 +294,23 @@ include 'includes/header.php';
         text-align: center !important;
         margin-top: 1rem;
     }
-}
-</style>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-function createChart(chartType) {
-    const modal = new bootstrap.Modal(document.getElementById('chartBuilderModal'));
-    const modalTitle = document.getElementById('chartModalTitle');
-    const modalBody = document.getElementById('chartModalBody');
     
-    const chartConfig = {
-        'timeline': {
-            title: 'Case Timeline Builder',
-            content: generateTimelineBuilder()
-        },
-        'statistics': {
-            title: 'Crime Statistics Chart',
-            content: generateStatisticsBuilder()
-        },
-        'evidence-flow': {
-            title: 'Evidence Flow Chart',
-            content: generateFlowChartBuilder()
-        },
-        'incident-analysis': {
-            title: 'Incident Analysis Chart',
-            content: generateIncidentAnalysisBuilder()
-        }
-    };
+    .feature-icon {
+        width: 60px !important;
+        height: 60px !important;
+    }
     
-    const config = chartConfig[chartType] || {
-        title: 'Chart Builder',
-        content: '<div class="p-4"><p>Chart type not found.</p></div>'
-    };
-    
-    modalTitle.textContent = config.title;
-    modalBody.innerHTML = config.content;
-    
-    // Initialize chart after modal is shown
-    modal._element.addEventListener('shown.bs.modal', function() {
-        initializeChart(chartType);
-    });
-    
-    modal.show();
-}
-
-function generateTimelineBuilder() {
-    return `
-        <div class="row">
-            <div class="col-md-4">
-                <h6 class="mb-3">Timeline Events</h6>
-                <div class="mb-3">
-                    <label class="form-label">Event Title</label>
-                    <input type="text" class="form-control" placeholder="Enter event title">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Date & Time</label>
-                    <input type="datetime-local" class="form-control">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Description</label>
-                    <textarea class="form-control" rows="3" placeholder="Event description"></textarea>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Event Type</label>
-                    <select class="form-select">
-                        <option>Investigation Start</option>
-                        <option>Evidence Collection</option>
-                        <option>Witness Interview</option>
-                        <option>Arrest</option>
-                        <option>Court Hearing</option>
-                        <option>Case Closure</option>
-                    </select>
-                </div>
-                <button class="btn btn-primary w-100">Add Event</button>
-                
-                <hr class="my-3">
-                
-                <h6>Added Events</h6>
-                <div class="timeline-events">
-                    <div class="event-item p-2 border rounded mb-2">
-                        <small class="text-muted">2024-01-15 09:00</small>
-                        <div class="fw-semibold">Case Opened</div>
-                    </div>
-                    <div class="event-item p-2 border rounded mb-2">
-                        <small class="text-muted">2024-01-16 14:30</small>
-                        <div class="fw-semibold">Evidence Collected</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-8">
-                <h6 class="mb-3">Timeline Preview</h6>
-                <div class="border rounded p-3" style="height: 400px;">
-                    <canvas id="timelineChart"></canvas>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function generateStatisticsBuilder() {
-    return `
-        <div class="row">
-            <div class="col-md-4">
-                <h6 class="mb-3">Data Configuration</h6>
-                <div class="mb-3">
-                    <label class="form-label">Chart Type</label>
-                    <select class="form-select">
-                        <option>Bar Chart</option>
-                        <option>Pie Chart</option>
-                        <option>Line Chart</option>
-                        <option>Doughnut Chart</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Data Categories</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" checked>
-                        <label class="form-check-label">Theft</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" checked>
-                        <label class="form-check-label">Assault</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" checked>
-                        <label class="form-check-label">Drug Offenses</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox">
-                        <label class="form-check-label">Traffic Violations</label>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Time Period</label>
-                    <select class="form-select">
-                        <option>Last 30 Days</option>
-                        <option>Last 3 Months</option>
-                        <option>Last 6 Months</option>
-                        <option>Last Year</option>
-                    </select>
-                </div>
-                <button class="btn btn-primary w-100">Update Chart</button>
-            </div>
-            <div class="col-md-8">
-                <h6 class="mb-3">Statistics Chart</h6>
-                <div class="border rounded p-3" style="height: 400px;">
-                    <canvas id="statisticsChart"></canvas>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function generateFlowChartBuilder() {
-    return `
-        <div class="text-center p-5">
-            <i class="fas fa-project-diagram fa-4x text-warning mb-3"></i>
-            <h5>Evidence Flow Chart Builder</h5>
-            <p class="text-muted">Drag and drop interface for creating evidence flow diagrams</p>
-            <button class="btn btn-warning">Launch Flow Chart Designer</button>
-        </div>
-    `;
-}
-
-function generateIncidentAnalysisBuilder() {
-    return `
-        <div class="row">
-            <div class="col-md-4">
-                <h6 class="mb-3">Analysis Parameters</h6>
-                <div class="mb-3">
-                    <label class="form-label">Geographic Area</label>
-                    <select class="form-select">
-                        <option>Colombo District</option>
-                        <option>Gampaha District</option>
-                        <option>Kalutara District</option>
-                        <option>All Areas</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Incident Types</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" checked>
-                        <label class="form-check-label">Burglary</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" checked>
-                        <label class="form-check-label">Vehicle Theft</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox">
-                        <label class="form-check-label">Vandalism</label>
-                    </div>
-                </div>
-                <button class="btn btn-primary w-100">Generate Analysis</button>
-            </div>
-            <div class="col-md-8">
-                <h6 class="mb-3">Incident Analysis</h6>
-                <div class="border rounded p-3" style="height: 400px;">
-                    <canvas id="incidentChart"></canvas>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function initializeChart(chartType) {
-    // Sample chart initialization based on type
-    if (chartType === 'statistics') {
-        const ctx = document.getElementById('statisticsChart');
-        if (ctx) {
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Theft', 'Assault', 'Drug Offenses', 'Fraud'],
-                    datasets: [{
-                        label: 'Number of Cases',
-                        data: [45, 23, 12, 8],
-                        backgroundColor: [
-                            'rgba(54, 162, 235, 0.8)',
-                            'rgba(255, 99, 132, 0.8)',
-                            'rgba(255, 206, 86, 0.8)',
-                            'rgba(75, 192, 192, 0.8)'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-        }
+    .feature-icon i {
+        font-size: 1.5rem !important;
     }
 }
 
-function generateQuickChart() {
-    const chartType = document.getElementById('chartType').value;
-    const dataSource = document.getElementById('dataSource').value;
-    const timePeriod = document.getElementById('timePeriod').value;
-    
-    alert(`Generating ${chartType} chart using ${dataSource} data for ${timePeriod}...`);
-    // Implementation for quick chart generation
+.alert-info {
+    border-left: 4px solid #17a2b8;
 }
+</style>
 
+<script>
 // Animation on load
 document.addEventListener('DOMContentLoaded', function() {
     const cards = document.querySelectorAll('.hover-card');
@@ -562,9 +322,52 @@ document.addEventListener('DOMContentLoaded', function() {
             card.style.transition = 'all 0.6s ease';
             card.style.opacity = '1';
             card.style.transform = 'translateY(0)';
-        }, index * 100);
+        }, index * 150);
+    });
+
+    // Animate statistics cards
+    const statCards = document.querySelectorAll('.card.border-0.shadow-sm');
+    statCards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.9)';
+            card.style.transition = 'all 0.5s ease';
+            
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'scale(1)';
+            }, 50);
+        }, (index + 4) * 100);
     });
 });
+
+// Quick navigation functions
+function goToRunningChart() {
+    window.location.href = 'running_chart.php';
+}
+
+function goToAddVehicle() {
+    window.location.href = 'add_vehicle.php';
+}
+
+function goToMyEntries() {
+    window.location.href = 'entry_viwe_page.php';
+}
+
+function goToCalculator() {
+    window.location.href = 'rc_calculator.php';
+}
+
+// Check if user has vehicles before going to running chart
+function checkVehiclesBeforeChart() {
+    const totalVehicles = <?php echo $vehicle_stats['total_vehicles']; ?>;
+    if (totalVehicles === 0) {
+        alert('Please add at least one vehicle before using the running chart.');
+        window.location.href = 'add_vehicle.php';
+        return false;
+    }
+    return true;
+}
 </script>
 
 <?php include 'includes/footer.php'; ?>

@@ -244,7 +244,7 @@ $user = getUserInfo();
         <div class="container">
             <!-- Logo with Hover Effect -->
             <a class="navbar-brand d-flex align-items-center" href="index.php" style="transition: all 0.3s ease;">
-                <img src="assets/images/logo.png" alt="Berekke Logo" class="me-2 animate__animated animate__fadeIn">
+                <img src="assets/images/log.png" alt="Berekke Logo" class="me-2 animate__animated animate__fadeIn">
             </a>
             
             <!-- Animated Mobile Toggle -->
@@ -279,6 +279,7 @@ $user = getUserInfo();
                             <li><a class="dropdown-item" href="running_chart_generator.php">
                                 <i class="fas fa-chart-line me-2"></i>Running Chart Generator
                             </a></li>
+                           
                         </ul>
                     </li>
                     

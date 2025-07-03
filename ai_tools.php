@@ -38,6 +38,44 @@ include 'includes/header.php';
 
             <!-- AI Tools Grid -->
             <div class="row g-4">
+                <!-- AI Legal Assistant - NEW FEATURED TOOL -->
+                <div class="col-lg-12 mb-4">
+                    <div class="card border-0 shadow-lg featured-ai-tool">
+                        <div class="card-body p-4">
+                            <div class="row align-items-center">
+                                <div class="col-lg-8">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="feature-icon bg-gradient-primary text-white rounded-circle me-3" 
+                                             style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-brain fa-2x"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="card-title mb-1">AI Legal Assistant</h4>
+                                            <span class="badge bg-warning text-dark me-2">NEW</span>
+                                            <span class="badge bg-success">Featured</span>
+                                        </div>
+                                    </div>
+                                    <p class="card-text text-muted mb-3">
+                                        Chat with an AI assistant trained on Sri Lankan law. Get instant answers about Penal Code, 
+                                        Criminal Procedure Code, and Evidence Ordinance. Ask questions in English or Sinhala!
+                                    </p>
+                                    <div class="d-flex gap-2 mb-2">
+                                        <span class="badge bg-primary">Penal Code Database</span>
+                                        <span class="badge bg-success">Criminal Procedure</span>
+                                        <span class="badge bg-warning text-dark">Evidence Ordinance</span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 text-center">
+                                    <a href="ai_legal_assistant.php" class="btn btn-primary btn-lg px-4">
+                                        <i class="fas fa-comments me-2"></i>Start Chat
+                                    </a>
+                                    <p class="text-muted small mt-2 mb-0">Powered by Google Gemini AI</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Document Analysis AI -->
                 <div class="col-lg-6 col-md-6">
                     <div class="card h-100 border-0 shadow-sm hover-card">

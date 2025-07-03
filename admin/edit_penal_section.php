@@ -1,0 +1,484 @@
+<?php
+require_once '../config/config.php';
+
+// Check if user is admin
+requireAdmin();
+
+$error_message = '';
+$success_message = '';
+$section_data = null;
+
+// Get section ID
+$section_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+if (!$section_id) {
+    header('Location: manage_penal_code.php');
+    exit();
+}
+
+// Fetch section data
+try {
+    $stmt = $pdo->prepare("SELECT * FROM penal_code WHERE id = ?");
+    $stmt->execute([$section_id]);
+    $section_data = $stmt->fetch();
+    
+    if (!$section_data) {
+        $_SESSION['error'] = 'Section not found.';
+        header('Location: manage_penal_code.php');
+        exit();
+    }
+} catch (PDOException $e) {
+    $error_message = 'Error fetching section data: ' . $e->getMessage();
+}
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $part_number = cleanInput($_POST['part_number']);
+    $part_name = cleanInput($_POST['part_name']);
+    $chapter = cleanInput($_POST['chapter']);
+    $chapter_name = cleanInput($_POST['chapter_name']);
+    $section_number = cleanInput($_POST['section_number']);
+    $sub_section_number = cleanInput($_POST['sub_section_number']);
+    $section_name = cleanInput($_POST['section_name']);
+    $section_topic = cleanInput($_POST['section_topic']);
+    $section_text = cleanInput($_POST['section_text']);
+    $explanation_1 = cleanInput($_POST['explanation_1']);
+    $illustrations_1 = cleanInput($_POST['illustrations_1']);
+    $explanation_2 = cleanInput($_POST['explanation_2']);
+    $illustrations_2 = cleanInput($_POST['illustrations_2']);
+    $explanation_3 = cleanInput($_POST['explanation_3']);
+    $illustrations_3 = cleanInput($_POST['illustrations_3']);
+    $explanation_4 = cleanInput($_POST['explanation_4']);
+    $illustrations_4 = cleanInput($_POST['illustrations_4']);
+    $amendments = cleanInput($_POST['amendments']);
+    
+    // Validation
+    if (empty($section_number) || empty($section_name) || empty($section_text)) {
+        $error_message = 'Section number, name, and text are required fields.';
+    } else {
+        // Check if section number already exists (excluding current section)
+        $stmt = $pdo->prepare("SELECT id FROM penal_code WHERE section_number = ? AND id != ?");
+        $stmt->execute([$section_number, $section_id]);
+        if ($stmt->fetch()) {
+            $error_message = 'A section with this number already exists.';
+        } else {
+            try {
+                $sql = "UPDATE penal_code SET 
+                    part_number = ?, part_name = ?, chapter = ?, chapter_name = ?, section_number = ?, 
+                    sub_section_number = ?, section_name = ?, section_topic = ?, section_text = ?,
+                    explanation_1 = ?, illustrations_1 = ?, explanation_2 = ?, illustrations_2 = ?,
+                    explanation_3 = ?, illustrations_3 = ?, explanation_4 = ?, illustrations_4 = ?, 
+                    amendments = ?
+                    WHERE id = ?";
+                
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    $part_number, $part_name, $chapter, $chapter_name, $section_number,
+                    $sub_section_number, $section_name, $section_topic, $section_text,
+                    $explanation_1, $illustrations_1, $explanation_2, $illustrations_2,
+                    $explanation_3, $illustrations_3, $explanation_4, $illustrations_4, 
+                    $amendments, $section_id
+                ]);
+                
+                $success_message = 'Penal Code section updated successfully!';
+                
+                // Refresh section data
+                $stmt = $pdo->prepare("SELECT * FROM penal_code WHERE id = ?");
+                $stmt->execute([$section_id]);
+                $section_data = $stmt->fetch();
+                
+            } catch (PDOException $e) {
+                $error_message = 'Error updating section: ' . $e->getMessage();
+            }
+        }
+    }
+}
+
+$page_title = "Edit Penal Code Section";
+include '../includes/header.php';
+?>
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2>
+                        <i class="fas fa-edit me-2 text-warning"></i>
+                        Edit Penal Code Section
+                    </h2>
+                    <p class="text-muted">
+                        Editing Section <?php echo htmlspecialchars($section_data['section_number']); ?>: 
+                        <?php echo htmlspecialchars($section_data['section_name']); ?>
+                    </p>
+                </div>
+                <div>
+                    <a href="manage_penal_code.php" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left me-1"></i>Back to List
+                    </a>
+                    <a href="admin_index.php" class="btn btn-outline-primary">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    <?php if ($error_message): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <?php echo $error_message; ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($success_message): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <?php echo $success_message; ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <!-- Form -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-gavel me-2"></i>
+                        Penal Code Section Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="">
+                        <!-- Basic Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-warning mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>Basic Information
+                                </h6>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="part_number" class="form-label">Part Number</label>
+                                <input type="text" class="form-control" id="part_number" name="part_number" 
+                                       value="<?php echo htmlspecialchars($section_data['part_number']); ?>"
+                                       placeholder="e.g., I, II, III">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="part_name" class="form-label">Part Name</label>
+                                <input type="text" class="form-control" id="part_name" name="part_name" 
+                                       value="<?php echo htmlspecialchars($section_data['part_name']); ?>"
+                                       placeholder="Part name in Sinhala">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="chapter" class="form-label">Chapter</label>
+                                <input type="text" class="form-control" id="chapter" name="chapter" 
+                                       value="<?php echo htmlspecialchars($section_data['chapter']); ?>"
+                                       placeholder="e.g., I, II, III">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="chapter_name" class="form-label">Chapter Name</label>
+                                <input type="text" class="form-control" id="chapter_name" name="chapter_name" 
+                                       value="<?php echo htmlspecialchars($section_data['chapter_name']); ?>"
+                                       placeholder="Chapter name in Sinhala">
+                            </div>
+                        </div>
+
+                        <!-- Section Details -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-warning mb-3">
+                                    <i class="fas fa-bookmark me-2"></i>Section Details
+                                </h6>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="section_number" class="form-label">Section Number <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="section_number" name="section_number" 
+                                       value="<?php echo htmlspecialchars($section_data['section_number']); ?>"
+                                       placeholder="e.g., 302, 379" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="sub_section_number" class="form-label">Sub-section Number</label>
+                                <input type="text" class="form-control" id="sub_section_number" name="sub_section_number" 
+                                       value="<?php echo htmlspecialchars($section_data['sub_section_number']); ?>"
+                                       placeholder="e.g., (1), (2), (a)">
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label for="section_name" class="form-label">Section Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="section_name" name="section_name" 
+                                       value="<?php echo htmlspecialchars($section_data['section_name']); ?>"
+                                       placeholder="Section name in Sinhala" required>
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label for="section_topic" class="form-label">Section Topic</label>
+                                <input type="text" class="form-control" id="section_topic" name="section_topic" 
+                                       value="<?php echo htmlspecialchars($section_data['section_topic']); ?>"
+                                       placeholder="Brief topic or subject in Sinhala">
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label for="section_text" class="form-label">Section Text <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="section_text" name="section_text" rows="6" 
+                                          placeholder="Complete section text in Sinhala" required><?php echo htmlspecialchars($section_data['section_text']); ?></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Explanations and Illustrations -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-warning mb-3">
+                                    <i class="fas fa-lightbulb me-2"></i>Explanations and Illustrations
+                                </h6>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="explanation_1" class="form-label">Explanation 1</label>
+                                <textarea class="form-control" id="explanation_1" name="explanation_1" rows="4" 
+                                          placeholder="First explanation in Sinhala"><?php echo htmlspecialchars($section_data['explanation_1']); ?></textarea>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="illustrations_1" class="form-label">Illustrations 1</label>
+                                <textarea class="form-control" id="illustrations_1" name="illustrations_1" rows="4" 
+                                          placeholder="First illustration in Sinhala"><?php echo htmlspecialchars($section_data['illustrations_1']); ?></textarea>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="explanation_2" class="form-label">Explanation 2</label>
+                                <textarea class="form-control" id="explanation_2" name="explanation_2" rows="4" 
+                                          placeholder="Second explanation in Sinhala"><?php echo htmlspecialchars($section_data['explanation_2']); ?></textarea>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="illustrations_2" class="form-label">Illustrations 2</label>
+                                <textarea class="form-control" id="illustrations_2" name="illustrations_2" rows="4" 
+                                          placeholder="Second illustration in Sinhala"><?php echo htmlspecialchars($section_data['illustrations_2']); ?></textarea>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="explanation_3" class="form-label">Explanation 3</label>
+                                <textarea class="form-control" id="explanation_3" name="explanation_3" rows="4" 
+                                          placeholder="Third explanation in Sinhala"><?php echo htmlspecialchars($section_data['explanation_3']); ?></textarea>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="illustrations_3" class="form-label">Illustrations 3</label>
+                                <textarea class="form-control" id="illustrations_3" name="illustrations_3" rows="4" 
+                                          placeholder="Third illustration in Sinhala"><?php echo htmlspecialchars($section_data['illustrations_3']); ?></textarea>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="explanation_4" class="form-label">Explanation 4</label>
+                                <textarea class="form-control" id="explanation_4" name="explanation_4" rows="4" 
+                                          placeholder="Fourth explanation in Sinhala"><?php echo htmlspecialchars($section_data['explanation_4']); ?></textarea>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="illustrations_4" class="form-label">Illustrations 4</label>
+                                <textarea class="form-control" id="illustrations_4" name="illustrations_4" rows="4" 
+                                          placeholder="Fourth illustration in Sinhala"><?php echo htmlspecialchars($section_data['illustrations_4']); ?></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Amendments -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-warning mb-3">
+                                    <i class="fas fa-edit me-2"></i>Amendments
+                                </h6>
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label for="amendments" class="form-label">Amendments</label>
+                                <textarea class="form-control" id="amendments" name="amendments" rows="4" 
+                                          placeholder="Any amendments to this section in Sinhala"><?php echo htmlspecialchars($section_data['amendments']); ?></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Section Info -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <h6 class="alert-heading">
+                                        <i class="fas fa-info-circle me-2"></i>Section Information
+                                    </h6>
+                                    <p class="mb-2">
+                                        <strong>Section ID:</strong> <?php echo $section_data['id']; ?><br>
+                                        <strong>Created:</strong> <?php echo date('F j, Y g:i A', strtotime($section_data['created_at'])); ?>
+                                    </p>
+                                    <hr>
+                                    <p class="mb-0">
+                                        <small class="text-muted">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            Any changes made here will be immediately reflected in the public search results.
+                                        </small>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <button type="button" class="btn btn-outline-danger" onclick="confirmDelete()">
+                                            <i class="fas fa-trash me-1"></i>Delete Section
+                                        </button>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <a href="manage_penal_code.php" class="btn btn-secondary">
+                                            <i class="fas fa-times me-1"></i>Cancel
+                                        </a>
+                                        <button type="submit" class="btn btn-warning">
+                                            <i class="fas fa-save me-1"></i>Update Section
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Confirm Deletion
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this Penal Code section?</p>
+                <div class="alert alert-warning">
+                    <strong>Section <?php echo htmlspecialchars($section_data['section_number']); ?>:</strong>
+                    <?php echo htmlspecialchars($section_data['section_name']); ?>
+                </div>
+                <p class="text-danger">
+                    <strong>Warning:</strong> This action cannot be undone. All bookmarks and notes related to this section will also be deleted.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="delete_penal_section.php?id=<?php echo $section_id; ?>" class="btn btn-danger">
+                    <i class="fas fa-trash me-1"></i>Delete Section
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.text-danger {
+    font-weight: bold;
+}
+
+.card {
+    border-radius: 10px;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.btn {
+    border-radius: 8px;
+    padding: 0.5rem 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .d-flex.justify-content-end {
+        justify-content: stretch !important;
+    }
+    
+    .d-flex.justify-content-end .btn {
+        flex: 1;
+    }
+}
+</style>
+
+<script>
+// Auto-resize textareas
+document.addEventListener('DOMContentLoaded', function() {
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+        
+        // Initial resize
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    });
+});
+
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const requiredFields = ['section_number', 'section_name', 'section_text'];
+    let hasError = false;
+    
+    requiredFields.forEach(field => {
+        const input = document.getElementById(field);
+        if (!input.value.trim()) {
+            input.classList.add('is-invalid');
+            hasError = true;
+        } else {
+            input.classList.remove('is-invalid');
+        }
+    });
+    
+    if (hasError) {
+        e.preventDefault();
+        alert('Please fill in all required fields.');
+    }
+});
+
+// Clear validation on input
+document.querySelectorAll('input, textarea').forEach(element => {
+    element.addEventListener('input', function() {
+        this.classList.remove('is-invalid');
+    });
+});
+
+// Confirm delete
+function confirmDelete() {
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+</script>
+
+<?php include '../includes/footer.php'; ?>

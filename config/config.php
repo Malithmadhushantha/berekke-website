@@ -16,27 +16,46 @@ define('PROFILE_PICS_PATH', UPLOAD_PATH . 'profiles/');
 define('BLOG_IMAGES_PATH', UPLOAD_PATH . 'blogs/');
 define('DOWNLOADS_PATH', UPLOAD_PATH . 'downloads/');
 
-// Session configuration
+// Session Configuration
 ini_set('session.gc_maxlifetime', 604800); // 7 days
-session_set_cookie_params(604800); // 7 days
+session_set_cookie_params([
+    'lifetime' => 604800, // 7 days
+    'path' => '/',
+    'domain' => '',  // Use current domain
+    'secure' => false, // Set to true on HTTPS
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
 
-// Start session
 session_start();
 
-// Database connection
+// Database Connection
 try {
-    $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-} catch(PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
+    $pdo = new PDO(
+        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+        DB_USER,
+        DB_PASS,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]
+    );
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
 }
 
-// Helper Functions
+// ----------- Helper Functions -----------
+
+/**
+ * Check if user is logged in
+ */
 function isLoggedIn() {
     return isset($_SESSION['user_id']) && isset($_SESSION['session_token']);
 }
 
+/**
+ * Redirect user to login page if not authenticated
+ */
 function requireLogin() {
     if (!isLoggedIn()) {
         $_SESSION['login_required'] = true;
@@ -45,13 +64,19 @@ function requireLogin() {
     }
 }
 
+/**
+ * Redirect user to homepage if not admin
+ */
 function requireAdmin() {
-    if (!isLoggedIn() || $_SESSION['user_role'] !== 'admin') {
+    if (!isLoggedIn() || ($_SESSION['user_role'] ?? '') !== 'admin') {
         header('Location: index.php');
         exit();
     }
 }
 
+/**
+ * Fetch logged-in user's information
+ */
 function getUserInfo() {
     global $pdo;
     if (isLoggedIn()) {
@@ -62,51 +87,60 @@ function getUserInfo() {
     return null;
 }
 
+/**
+ * Clean input to prevent XSS and injection
+ */
 function cleanInput($data) {
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data);
-    return $data;
+    return htmlspecialchars(stripslashes(trim($data)));
 }
 
+/**
+ * Generate a 6-digit numeric OTP
+ */
 function generateOTP() {
-    return sprintf("%06d", mt_rand(1, 999999));
+    return str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 }
 
+/**
+ * Send an OTP email (simple mail implementation)
+ */
 function sendOTP($email, $otp) {
-    // Simple email function - replace with proper email service
     $subject = "Berekke Website OTP Verification";
-    $message = "Your OTP for Berekke Website is: " . $otp;
+    $message = "Your OTP for Berekke Website is: $otp";
     $headers = "From: " . ADMIN_EMAIL;
-    
+
     return mail($email, $subject, $message, $headers);
 }
 
+/**
+ * Validate the current user's session token in DB
+ */
 function validateSession() {
     global $pdo;
-    
+
     if (!isLoggedIn()) {
         return false;
     }
-    
+
     $stmt = $pdo->prepare("SELECT * FROM user_sessions WHERE user_id = ? AND session_token = ? AND expires_at > NOW()");
     $stmt->execute([$_SESSION['user_id'], $_SESSION['session_token']]);
     $session = $stmt->fetch();
-    
+
     if (!$session) {
-        // Invalid session
+        // Session invalid — clean up and log out user
+        session_unset();
         session_destroy();
         return false;
     }
-    
-    // Update last activity
+
+    // Update last activity timestamp
     $stmt = $pdo->prepare("UPDATE user_sessions SET last_activity = NOW() WHERE id = ?");
     $stmt->execute([$session['id']]);
-    
+
     return true;
 }
 
-// Validate session on every page load
+// Automatically validate session on every page load
 if (isLoggedIn()) {
     validateSession();
 }

@@ -8,8 +8,7 @@
                         Berekke Website
                     </h5>
                     <p class="text-light">
-                        Sri Lankan Police officers සඳහා නිර්මාණය කළ විශේෂ වෙබ් අඩවියකි. 
-                        නීතිමය ප්‍රලේඛන, මෙවලම් සහ අවශ්‍ය සියලුම තොරතුරු සඳහා ඔබගේ විශ්වසනීය මූලාශ්‍රය.
+                        A special website created for Sri Lankan Police officers. Your trusted source for legal documents, tools and all the necessary information.
                     </p>
                     <div class="d-flex">
                         <a href="#" class="text-blue me-3"><i class="fab fa-facebook-f"></i></a>

@@ -12,8 +12,8 @@ include 'includes/header.php';
                     Welcome to <span class="text-warning">Berekke</span>
                 </h1>
                 <p class="lead mb-4">
-                    Sri Lankan Police officers සඳහා නිර්මාණය කළ විශේෂ ඩිජිටල් වේදිකාවකි. 
-                    නීතිමය ප්‍රලේখන, AI මෙවලම්, සහ අවශ්‍ය සියලුම සම්පත් එක තැනින්.
+                    A special digital platform created for Sri Lankan Police officers.
+                    Legal documents, AI tools, and all the necessary resources in one place.    
                 </p>
                 <div class="d-flex flex-wrap gap-3">
                     <?php if (!isLoggedIn()): ?>
@@ -45,7 +45,7 @@ include 'includes/header.php';
 <section class="py-5">
     <div class="container">
         <div class="text-center mb-5">
-            <h2 class="fw-bold">ප්‍රධාන විශේෂාංග</h2>
+            <h2 class="fw-bold">Main Features</h2>
             <p class="text-muted">Our platform offers comprehensive tools for modern policing</p>
         </div>
         

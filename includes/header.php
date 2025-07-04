@@ -39,7 +39,7 @@ $user = getUserInfo();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($page_title) ? $page_title . ' - ' . SITE_NAME : SITE_NAME; ?></title>
-    
+    <link rel="shortcut icon" href="../assets/images/fav.png">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -244,7 +244,7 @@ $user = getUserInfo();
         <div class="container">
             <!-- Logo with Hover Effect -->
             <a class="navbar-brand d-flex align-items-center" href="index.php" style="transition: all 0.3s ease;">
-                <img src="assets/images/log.png" alt="Berekke Logo" class="me-2 animate__animated animate__fadeIn">
+                <img src="assets/images/logoo.png" alt="Berekke Logo" class="me-2 animate__animated animate__fadeIn">
             </a>
             
             <!-- Animated Mobile Toggle -->
@@ -279,6 +279,10 @@ $user = getUserInfo();
                             <li><a class="dropdown-item" href="running_chart_generator.php">
                                 <i class="fas fa-chart-line me-2"></i>Running Chart Generator
                             </a></li>
+                            <li><a class="dropdown-item" href="create_report.php">
+                                <i class="fas fa-clipboard me-2"></i>Report Generator
+                            </a></li>
+                           
                            
                         </ul>
                     </li>

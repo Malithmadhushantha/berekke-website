@@ -117,7 +117,7 @@ $logo_path = $base_path . 'assets/images/logoo.png';
                         <i class="fas fa-copyright me-1"></i>
                         <?php echo date('Y'); ?> Berekke Website. All rights reserved.
                     </p>
-                    <small class="text-muted">
+                    <small class="text-white">
                         Built with <i class="fas fa-heart text-danger"></i> for Sri Lankan Police
                     </small>
                 </div>
@@ -141,17 +141,7 @@ $logo_path = $base_path . 'assets/images/logoo.png';
             </div>
             
             <!-- Additional Footer Info -->
-            <div class="row mt-4">
-                <div class="col-12 text-center">
-                    <div class="footer-stats">
-                        <small class="text-muted">
-                            Serving the Sri Lankan Police Force | 
-                            <span id="visitor-count">Visitors: Loading...</span> | 
-                            Last Updated: <?php echo date('F Y'); ?>
-                        </small>
-                    </div>
-                </div>
-            </div>
+
         </div>
     </footer>
 

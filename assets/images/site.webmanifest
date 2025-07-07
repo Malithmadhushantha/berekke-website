@@ -1,0 +1,86 @@
+{
+  "name": "Berekke Website - Sri Lankan Police Platform",
+  "short_name": "Berekke",
+  "description": "A comprehensive digital platform for Sri Lankan Police officers with legal documents, tools, and resources.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0056b3",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "si",
+  "dir": "ltr",
+  "categories": ["government", "utilities", "productivity"],
+  "icons": [
+    {
+      "src": "web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Penal Code",
+      "short_name": "Penal Code",
+      "description": "Access Sri Lankan Penal Code",
+      "url": "/penal_code.php",
+      "icons": [
+        {
+          "src": "favicon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Police Tools",
+      "short_name": "Tools",
+      "description": "Access Police Tools and Resources",
+      "url": "/ai_tools.php",
+      "icons": [
+        {
+          "src": "favicon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Downloads",
+      "short_name": "Downloads",
+      "description": "Download Police Resources",
+      "url": "/downloads.php",
+      "icons": [
+        {
+          "src": "favicon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "logo.png",
+      "type": "image/png",
+      "sizes": "1280x720",
+      "form_factor": "wide"
+    }
+  ]
+}

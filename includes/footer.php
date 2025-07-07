@@ -2,7 +2,7 @@
 // Detect current directory and set paths (same logic as header)
 $is_admin = (basename(dirname($_SERVER['PHP_SELF'])) === 'admin');
 $base_path = $is_admin ? '../' : '';
-$logo_path = $base_path . 'assets/images/logoo.png';
+$logo_path = $base_path . 'assets/images/logo.png';
 ?>
 
     <!-- Footer -->

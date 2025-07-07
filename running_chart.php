@@ -26,140 +26,151 @@ $calculation_result = null;
 
 // Handle calculation submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['calculate_fuel_burned'])) {
-        $calculation_type = cleanInput($_POST['calculation_type']);
-        $fuel_refilled = floatval($_POST['fuel_refilled']);
-        $input_value = floatval($_POST['input_value']);
-        
-        $initial_odo = $primary_vehicle['current_odo_reading'];
-        $initial_fuel = $primary_vehicle['current_fuel_amount'];
-        $efficiency = $primary_vehicle['fuel_efficiency'];
-        
-        if ($calculation_type === 'distance_driven') {
-            $distance_driven = $input_value;
-            $final_odo = $initial_odo + $distance_driven;
-            $fuel_consumed = $distance_driven / $efficiency;
-            $final_fuel = $initial_fuel + $fuel_refilled - $fuel_consumed;
+    // Check if this is a duplicate submission
+    $is_duplicate = false;
+    if (isset($_SESSION['last_post']) && $_SESSION['last_post'] === $_POST) {
+        $is_duplicate = true;
+    }
+    $_SESSION['last_post'] = $_POST;
+    
+    if (!$is_duplicate) {
+        if (isset($_POST['calculate_fuel_burned'])) {
+            $calculation_type = cleanInput($_POST['calculation_type']);
+            $fuel_refilled = floatval($_POST['fuel_refilled']);
+            $input_value = floatval($_POST['input_value']);
             
-            $calculation_result = [
-                'type' => 'distance_driven',
-                'distance_driven' => $distance_driven,
-                'final_odo' => $final_odo,
-                'fuel_consumed' => $fuel_consumed,
-                'final_fuel' => max(0, $final_fuel),
-                'fuel_refilled' => $fuel_refilled
-            ];
-        } elseif ($calculation_type === 'odo_entered') {
-            $final_odo = $input_value;
-            if ($final_odo <= $initial_odo) {
-                $error_message = 'Final ODO reading must be greater than current ODO reading.';
-            } else {
-                $distance_driven = $final_odo - $initial_odo;
+            $initial_odo = $primary_vehicle['current_odo_reading'];
+            $initial_fuel = $primary_vehicle['current_fuel_amount'];
+            $efficiency = $primary_vehicle['fuel_efficiency'];
+            
+            if ($calculation_type === 'distance_driven') {
+                $distance_driven = $input_value;
+                $final_odo = $initial_odo + $distance_driven;
                 $fuel_consumed = $distance_driven / $efficiency;
                 $final_fuel = $initial_fuel + $fuel_refilled - $fuel_consumed;
                 
                 $calculation_result = [
-                    'type' => 'odo_entered',
+                    'type' => 'distance_driven',
                     'distance_driven' => $distance_driven,
                     'final_odo' => $final_odo,
                     'fuel_consumed' => $fuel_consumed,
                     'final_fuel' => max(0, $final_fuel),
                     'fuel_refilled' => $fuel_refilled
                 ];
+            } elseif ($calculation_type === 'odo_entered') {
+                $final_odo = $input_value;
+                if ($final_odo <= $initial_odo) {
+                    $error_message = 'Final ODO reading must be greater than current ODO reading.';
+                } else {
+                    $distance_driven = $final_odo - $initial_odo;
+                    $fuel_consumed = $distance_driven / $efficiency;
+                    $final_fuel = $initial_fuel + $fuel_refilled - $fuel_consumed;
+                    
+                    $calculation_result = [
+                        'type' => 'odo_entered',
+                        'distance_driven' => $distance_driven,
+                        'final_odo' => $final_odo,
+                        'fuel_consumed' => $fuel_consumed,
+                        'final_fuel' => max(0, $final_fuel),
+                        'fuel_refilled' => $fuel_refilled
+                    ];
+                }
             }
-        }
-    } elseif (isset($_POST['calculate_distance_for_fuel'])) {
-        $fuel_to_burn = floatval($_POST['fuel_to_burn']);
-        $fuel_in_tank = floatval($_POST['fuel_in_tank']);
-        
-        $efficiency = $primary_vehicle['fuel_efficiency'];
-        $initial_odo = $primary_vehicle['current_odo_reading'];
-        
-        $distance_to_drive = $fuel_to_burn * $efficiency;
-        $final_fuel = $fuel_in_tank - $fuel_to_burn;
-        $final_odo = $initial_odo + $distance_to_drive;
-        
-        $calculation_result = [
-            'type' => 'fuel_specified',
-            'fuel_to_burn' => $fuel_to_burn,
-            'distance_to_drive' => $distance_to_drive,
-            'final_fuel' => max(0, $final_fuel),
-            'final_odo' => $final_odo
-        ];
-    } elseif (isset($_POST['calculate_distance_to_save_fuel'])) {
-        $fuel_to_save = floatval($_POST['fuel_to_save']);
-        
-        $initial_fuel = $primary_vehicle['current_fuel_amount'];
-        $efficiency = $primary_vehicle['fuel_efficiency'];
-        $initial_odo = $primary_vehicle['current_odo_reading'];
-        
-        if ($fuel_to_save >= $initial_fuel) {
-            $error_message = 'Fuel to save cannot be greater than or equal to current fuel amount.';
-        } else {
-            $fuel_to_burn = $initial_fuel - $fuel_to_save;
+        } elseif (isset($_POST['calculate_distance_for_fuel'])) {
+            $fuel_to_burn = floatval($_POST['fuel_to_burn']);
+            $fuel_in_tank = floatval($_POST['fuel_in_tank']);
+            
+            $efficiency = $primary_vehicle['fuel_efficiency'];
+            $initial_odo = $primary_vehicle['current_odo_reading'];
+            
             $distance_to_drive = $fuel_to_burn * $efficiency;
+            $final_fuel = $fuel_in_tank - $fuel_to_burn;
             $final_odo = $initial_odo + $distance_to_drive;
             
             $calculation_result = [
-                'type' => 'fuel_to_save',
-                'fuel_to_save' => $fuel_to_save,
+                'type' => 'fuel_specified',
                 'fuel_to_burn' => $fuel_to_burn,
                 'distance_to_drive' => $distance_to_drive,
-                'final_fuel' => $fuel_to_save,
+                'final_fuel' => max(0, $final_fuel),
                 'final_odo' => $final_odo
             ];
+        } elseif (isset($_POST['calculate_distance_to_save_fuel'])) {
+            $fuel_to_save = floatval($_POST['fuel_to_save']);
+            
+            $initial_fuel = $primary_vehicle['current_fuel_amount'];
+            $efficiency = $primary_vehicle['fuel_efficiency'];
+            $initial_odo = $primary_vehicle['current_odo_reading'];
+            
+            if ($fuel_to_save >= $initial_fuel) {
+                $error_message = 'Fuel to save cannot be greater than or equal to current fuel amount.';
+            } else {
+                $fuel_to_burn = $initial_fuel - $fuel_to_save;
+                $distance_to_drive = $fuel_to_burn * $efficiency;
+                $final_odo = $initial_odo + $distance_to_drive;
+                
+                $calculation_result = [
+                    'type' => 'fuel_to_save',
+                    'fuel_to_save' => $fuel_to_save,
+                    'fuel_to_burn' => $fuel_to_burn,
+                    'distance_to_drive' => $distance_to_drive,
+                    'final_fuel' => $fuel_to_save,
+                    'final_odo' => $final_odo
+                ];
+            }
+        } elseif (isset($_POST['save_for_next_round'])) {
+            // Save trip entry and update vehicle
+            $trip_data = json_decode($_POST['trip_data'], true);
+            
+            try {
+                $pdo->beginTransaction();
+                
+                // Insert trip entry
+                $stmt = $pdo->prepare("INSERT INTO trip_entries (user_id, vehicle_id, trip_date, calculation_type, initial_odo_reading, initial_fuel_amount, distance_driven, final_odo_reading, fuel_refilled, fuel_consumed, final_fuel_amount, input_distance, input_fuel_amount, input_fuel_to_save, trip_notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                
+                $stmt->execute([
+                    $_SESSION['user_id'],
+                    $primary_vehicle['id'],
+                    date('Y-m-d'),
+                    $trip_data['type'],
+                    $primary_vehicle['current_odo_reading'],
+                    $primary_vehicle['current_fuel_amount'],
+                    $trip_data['distance_driven'] ?? null,
+                    $trip_data['final_odo'],
+                    $trip_data['fuel_refilled'] ?? 0,
+                    $trip_data['fuel_consumed'] ?? $trip_data['fuel_to_burn'] ?? 0,
+                    $trip_data['final_fuel'],
+                    $trip_data['distance_driven'] ?? $trip_data['distance_to_drive'] ?? null,
+                    $trip_data['fuel_to_burn'] ?? null,
+                    $trip_data['fuel_to_save'] ?? null,
+                    cleanInput($_POST['trip_notes'])
+                ]);
+                
+                // Update vehicle's current readings
+                $stmt = $pdo->prepare("UPDATE vehicles SET current_odo_reading = ?, current_fuel_amount = ? WHERE id = ?");
+                $stmt->execute([
+                    $trip_data['final_odo'],
+                    $trip_data['final_fuel'],
+                    $primary_vehicle['id']
+                ]);
+                
+                $pdo->commit();
+                
+                $success_message = 'Trip saved successfully! Vehicle readings have been updated.';
+                
+                // Refresh primary vehicle data
+                $stmt = $pdo->prepare("SELECT * FROM vehicles WHERE id = ?");
+                $stmt->execute([$primary_vehicle['id']]);
+                $primary_vehicle = $stmt->fetch();
+                
+                $calculation_result = null;
+                
+            } catch (PDOException $e) {
+                $pdo->rollBack();
+                $error_message = 'Failed to save trip. Please try again.';
+            }
         }
-    } elseif (isset($_POST['save_for_next_round'])) {
-        // Save trip entry and update vehicle
-        $trip_data = json_decode($_POST['trip_data'], true);
-        
-        try {
-            $pdo->beginTransaction();
-            
-            // Insert trip entry
-            $stmt = $pdo->prepare("INSERT INTO trip_entries (user_id, vehicle_id, trip_date, calculation_type, initial_odo_reading, initial_fuel_amount, distance_driven, final_odo_reading, fuel_refilled, fuel_consumed, final_fuel_amount, input_distance, input_fuel_amount, input_fuel_to_save, trip_notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            
-            $stmt->execute([
-                $_SESSION['user_id'],
-                $primary_vehicle['id'],
-                date('Y-m-d'),
-                $trip_data['type'],
-                $primary_vehicle['current_odo_reading'],
-                $primary_vehicle['current_fuel_amount'],
-                $trip_data['distance_driven'] ?? null,
-                $trip_data['final_odo'],
-                $trip_data['fuel_refilled'] ?? 0,
-                $trip_data['fuel_consumed'] ?? $trip_data['fuel_to_burn'] ?? 0,
-                $trip_data['final_fuel'],
-                $trip_data['distance_driven'] ?? $trip_data['distance_to_drive'] ?? null,
-                $trip_data['fuel_to_burn'] ?? null,
-                $trip_data['fuel_to_save'] ?? null,
-                cleanInput($_POST['trip_notes'])
-            ]);
-            
-            // Update vehicle's current readings
-            $stmt = $pdo->prepare("UPDATE vehicles SET current_odo_reading = ?, current_fuel_amount = ? WHERE id = ?");
-            $stmt->execute([
-                $trip_data['final_odo'],
-                $trip_data['final_fuel'],
-                $primary_vehicle['id']
-            ]);
-            
-            $pdo->commit();
-            
-            $success_message = 'Trip saved successfully! Vehicle readings have been updated.';
-            
-            // Refresh primary vehicle data
-            $stmt = $pdo->prepare("SELECT * FROM vehicles WHERE id = ?");
-            $stmt->execute([$primary_vehicle['id']]);
-            $primary_vehicle = $stmt->fetch();
-            
-            $calculation_result = null;
-            
-        } catch (PDOException $e) {
-            $pdo->rollBack();
-            $error_message = 'Failed to save trip. Please try again.';
-        }
+    } else {
+        $error_message = 'Duplicate submission detected. Please perform a new calculation.';
     }
 }
 
@@ -259,7 +270,7 @@ include 'includes/header.php';
                             </h5>
                         </div>
                         <div class="card-body">
-                            <form method="POST" action="">
+                            <form method="POST" action="" id="fuelBurnedForm">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label fw-semibold">D. Fuel Refilled During Trip (Liters)</label>
@@ -300,7 +311,7 @@ include 'includes/header.php';
                             </h5>
                         </div>
                         <div class="card-body">
-                            <form method="POST" action="">
+                            <form method="POST" action="" id="distanceForFuelForm">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label fw-semibold">F. Amount of Fuel to Burn (Liters)</label>
@@ -332,7 +343,7 @@ include 'includes/header.php';
                             </h5>
                         </div>
                         <div class="card-body">
-                            <form method="POST" action="">
+                            <form method="POST" action="" id="distanceToSaveForm">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label fw-semibold">F. Amount of Fuel to Save in Tank (Liters)</label>
@@ -350,114 +361,46 @@ include 'includes/header.php';
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
 
-            <!-- Calculation Results -->
-            <?php if ($calculation_result): ?>
-            <div class="row mt-5">
-                <div class="col-12">
-                    <div class="card border-0 shadow-lg border-start border-5 border-success">
-                        <div class="card-header bg-success text-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-chart-line me-2"></i>
-                                Calculation Results
-                            </h5>
+<!-- Calculation Result Modal -->
+<div class="modal fade" id="calculationResultModal" tabindex="-1" aria-labelledby="calculationResultModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="calculationResultModalLabel">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Calculation Results
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row" id="resultContent">
+                    <!-- Result content will be inserted here by JavaScript -->
+                </div>
+                
+                <!-- Save for Next Round -->
+                <div class="mt-4 p-3 border rounded">
+                    <h6 class="mb-3">Save Trip Entry</h6>
+                    <form method="POST" action="" id="saveTripForm">
+                        <input type="hidden" name="trip_data" id="tripDataInput">
+                        <div class="mb-3">
+                            <label class="form-label">Trip Notes (Optional)</label>
+                            <textarea class="form-control" name="trip_notes" rows="2" 
+                                      placeholder="Add any notes about this trip..."></textarea>
                         </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <?php if ($calculation_result['type'] === 'distance_driven' || $calculation_result['type'] === 'odo_entered'): ?>
-                                <div class="col-md-6 mb-3">
-                                    <div class="result-item p-3 bg-light rounded">
-                                        <h6 class="text-primary">Final ODO Reading</h6>
-                                        <h4><?php echo number_format($calculation_result['final_odo'], 2); ?> km</h4>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <div class="result-item p-3 bg-light rounded">
-                                        <h6 class="text-danger">Fuel Consumed</h6>
-                                        <h4><?php echo number_format($calculation_result['fuel_consumed'], 3); ?> L</h4>
-                                    </div>
-                                </div>
-                                <?php if ($calculation_result['type'] === 'odo_entered'): ?>
-                                <div class="col-md-6 mb-3">
-                                    <div class="result-item p-3 bg-light rounded">
-                                        <h6 class="text-info">Distance Driven</h6>
-                                        <h4><?php echo number_format($calculation_result['distance_driven'], 2); ?> km</h4>
-                                    </div>
-                                </div>
-                                <?php endif; ?>
-                                <div class="col-md-6 mb-3">
-                                    <div class="result-item p-3 bg-light rounded">
-                                        <h6 class="text-success">Remaining Fuel</h6>
-                                        <h4><?php echo number_format($calculation_result['final_fuel'], 3); ?> L</h4>
-                                        <?php if ($calculation_result['fuel_refilled'] > 0): ?>
-                                        <small class="text-muted">(includes <?php echo number_format($calculation_result['fuel_refilled'], 3); ?>L refill)</small>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                                
-                                <?php elseif ($calculation_result['type'] === 'fuel_specified'): ?>
-                                <div class="col-md-4 mb-3">
-                                    <div class="result-item p-3 bg-light rounded">
-                                        <h6 class="text-primary">Distance to Drive</h6>
-                                        <h4><?php echo number_format($calculation_result['distance_to_drive'], 2); ?> km</h4>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <div class="result-item p-3 bg-light rounded">
-                                        <h6 class="text-success">Remaining Fuel</h6>
-                                        <h4><?php echo number_format($calculation_result['final_fuel'], 3); ?> L</h4>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <div class="result-item p-3 bg-light rounded">
-                                        <h6 class="text-info">Final ODO Reading</h6>
-                                        <h4><?php echo number_format($calculation_result['final_odo'], 2); ?> km</h4>
-                                    </div>
-                                </div>
-                                
-                                <?php elseif ($calculation_result['type'] === 'fuel_to_save'): ?>
-                                <div class="col-md-4 mb-3">
-                                    <div class="result-item p-3 bg-light rounded">
-                                        <h6 class="text-primary">Distance to Drive</h6>
-                                        <h4><?php echo number_format($calculation_result['distance_to_drive'], 2); ?> km</h4>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <div class="result-item p-3 bg-light rounded">
-                                        <h6 class="text-warning">Fuel to Burn</h6>
-                                        <h4><?php echo number_format($calculation_result['fuel_to_burn'], 3); ?> L</h4>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <div class="result-item p-3 bg-light rounded">
-                                        <h6 class="text-info">Final ODO Reading</h6>
-                                        <h4><?php echo number_format($calculation_result['final_odo'], 2); ?> km</h4>
-                                    </div>
-                                </div>
-                                <?php endif; ?>
-                            </div>
-                            
-                            <!-- Save for Next Round -->
-                            <div class="mt-4 p-3 border rounded">
-                                <h6 class="mb-3">Save Trip Entry</h6>
-                                <form method="POST" action="">
-                                    <input type="hidden" name="trip_data" value="<?php echo htmlspecialchars(json_encode($calculation_result)); ?>">
-                                    <div class="mb-3">
-                                        <label class="form-label">Trip Notes (Optional)</label>
-                                        <textarea class="form-control" name="trip_notes" rows="2" 
-                                                  placeholder="Add any notes about this trip..."></textarea>
-                                    </div>
-                                    <button type="submit" name="save_for_next_round" class="btn btn-success btn-lg">
-                                        <i class="fas fa-save me-2"></i>Save for Next Round
-                                    </button>
-                                    <small class="text-muted ms-3">This will update your vehicle's ODO and fuel readings</small>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                        <button type="submit" name="save_for_next_round" class="btn btn-success btn-lg">
+                            <i class="fas fa-save me-2"></i>Save for Next Round
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-lg ms-2" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Close
+                        </button>
+                        <small class="text-muted ms-3 d-block mt-2">This will update your vehicle's ODO and fuel readings</small>
+                    </form>
                 </div>
             </div>
-            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -465,6 +408,8 @@ include 'includes/header.php';
 <style>
 .result-item {
     transition: all 0.3s ease;
+    border-left: 4px solid #198754;
+    background-color: rgba(25, 135, 84, 0.05);
 }
 
 .result-item:hover {
@@ -472,8 +417,19 @@ include 'includes/header.php';
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-.border-start {
-    border-left: 5px solid #198754 !important;
+.calculation-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.calculation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.calculation-card .card-header {
+    border-bottom: none;
+    background-color: #f8f9fa;
 }
 
 @media (max-width: 768px) {
@@ -481,34 +437,63 @@ include 'includes/header.php';
         font-size: 1.5rem;
     }
 }
+
+/* Animation for modal */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-content {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Pulse animation for calculate buttons */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.btn-primary, .btn-success, .btn-info {
+    animation: pulse 2s infinite;
+}
+
+.btn-primary:hover, .btn-success:hover, .btn-info:hover {
+    animation: none;
+}
 </style>
 
 <script>
-document.getElementById('calculation_type').addEventListener('change', function() {
-    const calculationType = this.value;
-    const inputLabel = document.getElementById('input_label');
-    const inputHelp = document.getElementById('input_help');
-    const inputValue = document.getElementById('input_value');
-    
-    if (calculationType === 'distance_driven') {
-        inputLabel.textContent = 'Distance Driven (Km)';
-        inputHelp.textContent = 'Enter the distance you drove in kilometers';
-        inputValue.placeholder = 'Enter distance in km';
-        inputValue.step = '0.01';
-    } else if (calculationType === 'odo_entered') {
-        inputLabel.textContent = 'ODO Reading After Trip (Km)';
-        inputHelp.textContent = 'Enter the ODO reading shown after your trip';
-        inputValue.placeholder = 'Enter ODO reading';
-        inputValue.step = '0.01';
-    } else {
-        inputLabel.textContent = 'Input Value';
-        inputHelp.textContent = 'Select calculation method first';
-        inputValue.placeholder = 'Enter value';
-    }
-});
-
-// Validate forms
 document.addEventListener('DOMContentLoaded', function() {
+    // Calculation type selector
+    const calculationType = document.getElementById('calculation_type');
+    if (calculationType) {
+        calculationType.addEventListener('change', function() {
+            const calculationTypeValue = this.value;
+            const inputLabel = document.getElementById('input_label');
+            const inputHelp = document.getElementById('input_help');
+            const inputValue = document.getElementById('input_value');
+            
+            if (calculationTypeValue === 'distance_driven') {
+                inputLabel.textContent = 'Distance Driven (Km)';
+                inputHelp.textContent = 'Enter the distance you drove in kilometers';
+                inputValue.placeholder = 'Enter distance in km';
+                inputValue.step = '0.01';
+            } else if (calculationTypeValue === 'odo_entered') {
+                inputLabel.textContent = 'ODO Reading After Trip (Km)';
+                inputHelp.textContent = 'Enter the ODO reading shown after your trip';
+                inputValue.placeholder = 'Enter ODO reading';
+                inputValue.step = '0.01';
+            } else {
+                inputLabel.textContent = 'Input Value';
+                inputHelp.textContent = 'Select calculation method first';
+                inputValue.placeholder = 'Enter value';
+            }
+        });
+    }
+
+    // Form validation
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
         form.addEventListener('submit', function(e) {
@@ -530,7 +515,116 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Check if we should show the modal
+    <?php if ($calculation_result): ?>
+        showResultModal(<?php echo json_encode($calculation_result); ?>);
+    <?php endif; ?>
 });
+
+function showResultModal(result) {
+    const modal = new bootstrap.Modal(document.getElementById('calculationResultModal'));
+    const resultContent = document.getElementById('resultContent');
+    const tripDataInput = document.getElementById('tripDataInput');
+    
+    // Set the trip data for the save form
+    tripDataInput.value = JSON.stringify(result);
+    
+    // Clear previous content
+    resultContent.innerHTML = '';
+    
+    // Create content based on result type
+    if (result.type === 'distance_driven' || result.type === 'odo_entered') {
+        // Create HTML for distance_driven or odo_entered results
+        let html = `
+            <div class="col-md-6 mb-3">
+                <div class="result-item p-3 rounded">
+                    <h6 class="text-primary">Final ODO Reading</h6>
+                    <h4>${result.final_odo.toFixed(2)} km</h4>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="result-item p-3 rounded">
+                    <h6 class="text-danger">Fuel Consumed</h6>
+                    <h4>${result.fuel_consumed.toFixed(3)} L</h4>
+                </div>
+            </div>`;
+            
+        if (result.type === 'odo_entered') {
+            html += `
+            <div class="col-md-6 mb-3">
+                <div class="result-item p-3 rounded">
+                    <h6 class="text-info">Distance Driven</h6>
+                    <h4>${result.distance_driven.toFixed(2)} km</h4>
+                </div>
+            </div>`;
+        }
+        
+        html += `
+            <div class="col-md-6 mb-3">
+                <div class="result-item p-3 rounded">
+                    <h6 class="text-success">Remaining Fuel</h6>
+                    <h4>${result.final_fuel.toFixed(3)} L</h4>`;
+                    
+        if (result.fuel_refilled > 0) {
+            html += `<small class="text-muted">(includes ${result.fuel_refilled.toFixed(3)}L refill)</small>`;
+        }
+        
+        html += `</div></div>`;
+        
+        resultContent.innerHTML = html;
+        
+    } else if (result.type === 'fuel_specified') {
+        resultContent.innerHTML = `
+            <div class="col-md-4 mb-3">
+                <div class="result-item p-3 rounded">
+                    <h6 class="text-primary">Distance to Drive</h6>
+                    <h4>${result.distance_to_drive.toFixed(2)} km</h4>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="result-item p-3 rounded">
+                    <h6 class="text-success">Remaining Fuel</h6>
+                    <h4>${result.final_fuel.toFixed(3)} L</h4>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="result-item p-3 rounded">
+                    <h6 class="text-info">Final ODO Reading</h6>
+                    <h4>${result.final_odo.toFixed(2)} km</h4>
+                </div>
+            </div>`;
+            
+    } else if (result.type === 'fuel_to_save') {
+        resultContent.innerHTML = `
+            <div class="col-md-4 mb-3">
+                <div class="result-item p-3 rounded">
+                    <h6 class="text-primary">Distance to Drive</h6>
+                    <h4>${result.distance_to_drive.toFixed(2)} km</h4>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="result-item p-3 rounded">
+                    <h6 class="text-warning">Fuel to Burn</h6>
+                    <h4>${result.fuel_to_burn.toFixed(3)} L</h4>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="result-item p-3 rounded">
+                    <h6 class="text-info">Final ODO Reading</h6>
+                    <h4>${result.final_odo.toFixed(2)} km</h4>
+                </div>
+            </div>`;
+    }
+    
+    // Show the modal
+    modal.show();
+    
+    // Focus on the notes field when modal is shown
+    document.getElementById('calculationResultModal').addEventListener('shown.bs.modal', function() {
+        document.querySelector('#saveTripForm textarea').focus();
+    });
+}
 </script>
 
 <?php include 'includes/footer.php'; ?>

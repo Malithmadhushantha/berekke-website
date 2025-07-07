@@ -31,6 +31,24 @@ if (!$config_loaded) {
     </div></div>');
 }
 
+// ==============================================
+// DETECT CURRENT DIRECTORY AND SET PATHS
+// ==============================================
+$is_admin = (basename(dirname($_SERVER['PHP_SELF'])) === 'admin');
+$base_path = $is_admin ? '../' : '';
+
+// Set correct paths based on directory level
+$logo_path = $base_path . 'assets/images/logoo.png';
+$favicon_path = $base_path . 'assets/images/fav.png';
+
+// Fix profile picture path
+if ($is_admin) {
+    // When in admin folder, we need to go back one level for uploads
+    $profile_pics_url = '../' . PROFILE_PICS_PATH;
+} else {
+    $profile_pics_url = PROFILE_PICS_PATH;
+}
+
 $user = getUserInfo();
 ?>
 <!DOCTYPE html>
@@ -39,7 +57,7 @@ $user = getUserInfo();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($page_title) ? $page_title . ' - ' . SITE_NAME : SITE_NAME; ?></title>
-    <link rel="shortcut icon" href="../assets/images/fav.png">
+    <link rel="shortcut icon" href="<?php echo $favicon_path; ?>">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -86,6 +104,22 @@ $user = getUserInfo();
         
         .navbar.scrolled .navbar-brand img {
             height: 40px;
+        }
+        
+        /* Admin badge indicator */
+        .admin-indicator {
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            color: #000;
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.5rem;
+            margin-left: 0.5rem;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 5px rgba(255, 107, 107, 0.5); }
+            to { box-shadow: 0 0 20px rgba(255, 107, 107, 0.8); }
         }
         
         /* Theme Toggle Button with Pulse Animation */
@@ -243,8 +277,11 @@ $user = getUserInfo();
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-nav">
         <div class="container">
             <!-- Logo with Hover Effect -->
-            <a class="navbar-brand d-flex align-items-center" href="index.php" style="transition: all 0.3s ease;">
-                <img src="assets/images/logoo.png" alt="Berekke Logo" class="me-2 animate__animated animate__fadeIn">
+            <a class="navbar-brand d-flex align-items-center" href="<?php echo $base_path; ?>index.php" style="transition: all 0.3s ease;">
+                <img src="<?php echo $logo_path; ?>" alt="Berekke Logo" class="me-2 animate__animated animate__fadeIn">
+                <?php if ($is_admin): ?>
+                <span class="admin-indicator">ADMIN</span>
+                <?php endif; ?>
             </a>
             
             <!-- Animated Mobile Toggle -->
@@ -256,7 +293,7 @@ $user = getUserInfo();
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link animate__animated animate__fadeIn" href="index.php" style="animation-delay: 0.1s;">
+                        <a class="nav-link animate__animated animate__fadeIn" href="<?php echo $base_path; ?>index.php" style="animation-delay: 0.1s;">
                             <i class="fas fa-home me-1"></i>Home
                         </a>
                     </li>
@@ -267,23 +304,21 @@ $user = getUserInfo();
                             <i class="fas fa-tools me-1"></i>Tools
                         </a>
                         <ul class="dropdown-menu animate__animated animate__fadeIn">
-                            <li><a class="dropdown-item" href="ai_tools.php">
+                            <li><a class="dropdown-item" href="<?php echo $base_path; ?>ai_tools.php">
                                 <i class="fas fa-robot me-2"></i>AI Tools
                             </a></li>
-                            <li><a class="dropdown-item" href="doc_tools.php">
+                            <li><a class="dropdown-item" href="<?php echo $base_path; ?>doc_tools.php">
                                 <i class="fas fa-file-alt me-2"></i>Doc Tools
                             </a></li>
-                            <li><a class="dropdown-item" href="image_tool.php">
+                            <li><a class="dropdown-item" href="<?php echo $base_path; ?>image_tool.php">
                                 <i class="fas fa-image me-2"></i>Image Tools
                             </a></li>
-                            <li><a class="dropdown-item" href="running_chart_generator.php">
+                            <li><a class="dropdown-item" href="<?php echo $base_path; ?>running_chart_generator.php">
                                 <i class="fas fa-chart-line me-2"></i>Running Chart Generator
                             </a></li>
-                            <li><a class="dropdown-item" href="create_report.php">
+                            <li><a class="dropdown-item" href="<?php echo $base_path; ?>create_report.php">
                                 <i class="fas fa-clipboard me-2"></i>Report Generator
                             </a></li>
-                           
-                           
                         </ul>
                     </li>
                     
@@ -293,32 +328,38 @@ $user = getUserInfo();
                             <i class="fas fa-gavel me-1"></i>Quick Tools
                         </a>
                         <ul class="dropdown-menu animate__animated animate__fadeIn">
-                            <li><a class="dropdown-item" href="penal_code.php">
+                            <li><a class="dropdown-item" href="<?php echo $base_path; ?>penal_code.php">
                                 <i class="fas fa-balance-scale me-2"></i>Penal Code
                             </a></li>
-                            <li><a class="dropdown-item" href="criminal_procedure_code_act.php">
+                            <li><a class="dropdown-item" href="<?php echo $base_path; ?>criminal_procedure_code_act.php">
                                 <i class="fas fa-clipboard-list me-2"></i>Criminal Procedure Code
                             </a></li>
-                            <li><a class="dropdown-item" href="evidence_ordinance.php">
+                            <li><a class="dropdown-item" href="<?php echo $base_path; ?>evidence_ordinance.php">
                                 <i class="fas fa-search me-2"></i>Evidence Ordinance
                             </a></li>
+                            <li><a class="dropdown-item" href="<?php echo $base_path; ?>police_station_directory.php">
+                                <i class="fas fa-building me-2"></i>Police Station Details
+                             </a></li>
+                            <li><a class="dropdown-item" href="<?php echo $base_path; ?>station_book_list.php">
+                                <i class="fas fa-book me-2"></i>Police Station Book List
+                             </a></li>
                         </ul>
                     </li>
                     
                     <li class="nav-item">
-                        <a class="nav-link animate__animated animate__fadeIn" href="downloads.php" style="animation-delay: 0.4s;">
+                        <a class="nav-link animate__animated animate__fadeIn" href="<?php echo $base_path; ?>downloads.php" style="animation-delay: 0.4s;">
                             <i class="fas fa-download me-1"></i>Downloads
                         </a>
                     </li>
                     
                     <li class="nav-item">
-                        <a class="nav-link animate__animated animate__fadeIn" href="blogs.php" style="animation-delay: 0.5s;">
+                        <a class="nav-link animate__animated animate__fadeIn" href="<?php echo $base_path; ?>blogs.php" style="animation-delay: 0.5s;">
                             <i class="fas fa-blog me-1"></i>Blogs
                         </a>
                     </li>
                     
                     <li class="nav-item">
-                        <a class="nav-link animate__animated animate__fadeIn" href="about_us.php" style="animation-delay: 0.6s;">
+                        <a class="nav-link animate__animated animate__fadeIn" href="<?php echo $base_path; ?>about_us.php" style="animation-delay: 0.6s;">
                             <i class="fas fa-info-circle me-1"></i>About Us
                         </a>
                     </li>
@@ -336,32 +377,42 @@ $user = getUserInfo();
                         <div class="dropdown">
                             <button class="btn btn-link dropdown-toggle text-white text-decoration-none p-0 d-flex align-items-center" 
                                     type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <img src="<?php echo PROFILE_PICS_PATH . $user['profile_picture']; ?>" 
-                                     alt="Profile" class="user-avatar me-2">
+                                <img src="<?php echo $profile_pics_url . $user['profile_picture']; ?>" 
+                                     alt="Profile" class="user-avatar me-2" 
+                                     onerror="this.src='<?php echo $base_path; ?>assets/images/default-avatar.png'">
                                 <span><?php echo htmlspecialchars($user['first_name']); ?></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end animate__animated animate__fadeIn">
-                                <li><a class="dropdown-item" href="profile.php">
+                                <li><a class="dropdown-item" href="<?php echo $base_path; ?>profile.php">
                                     <i class="fas fa-user me-2"></i>Profile
                                 </a></li>
-                                <li><a class="dropdown-item" href="my_bookmarks.php">
+                                <li><a class="dropdown-item" href="<?php echo $base_path; ?>my_bookmarks.php">
                                     <i class="fas fa-bookmark me-2"></i>My Bookmarks
                                 </a></li>
                                 <?php if ($user['role'] === 'admin'): ?>
                                 <li><hr class="dropdown-divider"></li>
+                                <?php if ($is_admin): ?>
+                                <li><a class="dropdown-item" href="admin_index.php">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
+                                </a></li>
+                                <li><a class="dropdown-item" href="<?php echo $base_path; ?>index.php">
+                                    <i class="fas fa-home me-2"></i>Back to Main Site
+                                </a></li>
+                                <?php else: ?>
                                 <li><a class="dropdown-item" href="admin/admin_index.php">
                                     <i class="fas fa-cog me-2"></i>Admin Dashboard
                                 </a></li>
                                 <?php endif; ?>
+                                <?php endif; ?>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="logout.php">
+                                <li><a class="dropdown-item" href="<?php echo $base_path; ?>logout.php">
                                     <i class="fas fa-sign-out-alt me-2"></i>Logout
                                 </a></li>
                             </ul>
                         </div>
                     <?php else: ?>
                         <!-- Login Button with Animation -->
-                        <a href="login.php" class="btn btn-outline-light animate__animated animate__pulse" style="animation-iteration-count: 2;">
+                        <a href="<?php echo $base_path; ?>login.php" class="btn btn-outline-light animate__animated animate__pulse" style="animation-iteration-count: 2;">
                             <i class="fas fa-sign-in-alt me-1"></i>Login
                         </a>
                     <?php endif; ?>

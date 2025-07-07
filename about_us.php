@@ -1,6 +1,26 @@
 <?php
 require_once 'config/config.php';
 
+// Helper function to get correct profile picture path
+function getProfilePicturePath($profile_picture) {
+    if (empty($profile_picture) || $profile_picture === 'default_avatar.jpg') {
+        return 'assets/images/avatars/default_avatar.jpg';
+    }
+    
+    // Check if it's a user profile picture (from uploads/profiles/)
+    if (file_exists(PROFILE_PICS_PATH . $profile_picture)) {
+        return PROFILE_PICS_PATH . $profile_picture;
+    }
+    
+    // Check if it's in avatars directory
+    if (file_exists('assets/images/avatars/' . $profile_picture)) {
+        return 'assets/images/avatars/' . $profile_picture;
+    }
+    
+    // Default fallback
+    return 'assets/images/avatars/default_avatar.jpg';
+}
+
 $success_message = '';
 $error_message = '';
 
@@ -18,9 +38,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_testimonial'])
     } else {
         try {
             $user_id = isLoggedIn() ? $_SESSION['user_id'] : null;
+            $profile_picture = 'default_avatar.jpg'; // Default avatar
             
-            $stmt = $pdo->prepare("INSERT INTO testimonials (user_id, name, email, position, organization, rating, comment) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$user_id, $name, $email, $position, $organization, $rating, $comment]);
+            // If user is logged in, get their profile picture
+            if ($user_id) {
+                $stmt = $pdo->prepare("SELECT profile_picture FROM users WHERE id = ?");
+                $stmt->execute([$user_id]);
+                $user_data = $stmt->fetch();
+                if ($user_data && !empty($user_data['profile_picture'])) {
+                    $profile_picture = $user_data['profile_picture'];
+                }
+            }
+            
+            $stmt = $pdo->prepare("INSERT INTO testimonials (user_id, name, email, position, organization, rating, comment, profile_picture) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$user_id, $name, $email, $position, $organization, $rating, $comment, $profile_picture]);
             
             $success_message = 'Thank you for your testimonial! It will be reviewed and published soon.';
             
@@ -57,9 +88,7 @@ include 'includes/header.php';
                 </p>
                 <div class="col-md-8 mx-auto">
                     <p class="text-muted">
-                        වර්තමාන ඩිජිටල් යුගයේ නීතිමය ක්ෂේත්‍රයේ කාර්යක්ෂමතාව වැඩි දියුණු කිරීම සඳහා නිර්මාණය කරන ලද 
-                        විශේෂ වේදිකාවකි. ශ්‍රී ලංකා පොලිස් සේවයේ නිලධාරීන් සඳහා නීතිමය සම්පත්, නවීන මෙවලම් සහ 
-                        ප්‍රායෝගික විසඳුම් ලබා දෙන අරමුණින් මෙම වෙබ් අඩවිය සකස් කර ඇත.
+A special platform created to improve the efficiency of the legal sector in today's digital era. This website has been developed with the aim of providing legal resources, modern tools and practical solutions for officers of the Sri Lanka Police Service.
                     </p>
                 </div>
             </div>
@@ -109,7 +138,7 @@ include 'includes/header.php';
         <div class="col-lg-8 mx-auto">
             <div class="card border-0 shadow-lg">
                 <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <div class="text-center text-white py-3">
+                    <div class="text-center fw-bold py-3">
                         <h4 class="mb-0">
                             <i class="fas fa-user-tie me-2"></i>
                             Developer Profile
@@ -141,8 +170,8 @@ include 'includes/header.php';
                         <div class="col-md-8">
                             <h3 class="text-primary mb-2">Malith Madhushantha</h3>
                             <h5 class="text-muted mb-3">
-                                <i class="fas fa-badge-check text-success me-2"></i>
-                                Police Constable & Full-Stack Developer
+                                         <i class="fas fa-id-card me-2" style="color: #3A51E5FF;"></i>
+                                Police Officer & Full-Stack Developer
                             </h5>
                             
                             <p class="mb-4">
@@ -351,8 +380,8 @@ include 'includes/header.php';
                                 <div class="card border-0 shadow-lg">
                                     <div class="card-body p-5 text-center">
                                         <div class="mb-4">
-                                            <img src="assets/images/avatars/<?php echo htmlspecialchars($testimonial['profile_picture']); ?>" 
-                                                 alt="<?php echo htmlspecialchars($testimonial['name']); ?>"
+                                            <img src="<?php echo getProfilePicturePath($testimonial['profile_picture']); ?>" 
+                                             alt="<?php echo htmlspecialchars($testimonial['name']); ?>"
                                                  class="rounded-circle border border-3 border-primary"
                                                  style="width: 80px; height: 80px; object-fit: cover;"
                                                  onerror="this.src='assets/images/avatars/default_avatar.jpg'">
@@ -402,8 +431,8 @@ include 'includes/header.php';
                         <div class="card h-100 border-0 shadow-sm testimonial-card">
                             <div class="card-body p-4">
                                 <div class="d-flex align-items-center mb-3">
-                                    <img src="assets/images/avatars/<?php echo htmlspecialchars($testimonial['profile_picture']); ?>" 
-                                         alt="<?php echo htmlspecialchars($testimonial['name']); ?>"
+                                                                            <img src="<?php echo getProfilePicturePath($testimonial['profile_picture']); ?>" 
+                                             alt="<?php echo htmlspecialchars($testimonial['name']); ?>"
                                          class="rounded-circle me-3"
                                          style="width: 50px; height: 50px; object-fit: cover;"
                                          onerror="this.src='assets/images/avatars/default_avatar.jpg'">
@@ -920,6 +949,7 @@ include 'includes/header.php';
 .social-links a:hover {
     transform: translateY(-2px);
 }
+
 </style>
 
 <script>

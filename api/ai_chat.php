@@ -6,7 +6,7 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 require_once '../config/config.php';
 require_once '../config/ai_config.php';
-
+ 
 // Check if user is logged in
 if (!isLoggedIn()) {
     http_response_code(401);

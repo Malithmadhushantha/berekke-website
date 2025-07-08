@@ -83,7 +83,7 @@ if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <!-- TITLE MUST BE FIRST -->
+    <!-- TITLE MUST BE FIRST --> 
     <title><?php echo isset($page_title) ? htmlspecialchars($page_title) . ' - ' . SITE_NAME : SITE_NAME; ?></title>
     
     <!-- FAVICONS MUST BE IMMEDIATELY AFTER TITLE -->

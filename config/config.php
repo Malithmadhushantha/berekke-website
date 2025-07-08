@@ -10,7 +10,7 @@ define('SITE_NAME', 'Berekke Website');
 define('SITE_URL', 'http://localhost/berekke-website');
 define('ADMIN_EMAIL', 'admin@berekke.lk');
 
-
+ 
 // Environment setting (for cache busting)
 define('ENVIRONMENT', 'development'); // Change to 'production' when live
 

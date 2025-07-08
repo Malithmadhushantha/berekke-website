@@ -69,6 +69,12 @@ if ($is_admin) {
 
 $user = getUserInfo();
 $current_page = basename($_SERVER['PHP_SELF']);
+
+// Simplified cache buster (only for development)
+$cache_buster = '';
+if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
+    $cache_buster = '?v=' . date('YmdHis');
+}
 ?>
 <!DOCTYPE html>
 <html lang="si" data-bs-theme="light">
@@ -77,16 +83,57 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
+    <!-- TITLE MUST BE FIRST -->
+    <title><?php echo isset($page_title) ? htmlspecialchars($page_title) . ' - ' . SITE_NAME : SITE_NAME; ?></title>
+    
+    <!-- FAVICONS MUST BE IMMEDIATELY AFTER TITLE -->
+    <!-- Standard Favicon (MOST IMPORTANT - MUST BE FIRST) -->
+    <link rel="icon" type="image/x-icon" href="<?php echo $favicon_path . $cache_buster; ?>">
+    <link rel="shortcut icon" type="image/x-icon" href="<?php echo $favicon_path . $cache_buster; ?>">
+    
+    <!-- PNG Favicons -->
+    <link rel="icon" type="image/png" sizes="16x16" href="<?php echo $base_path; ?>assets/images/favicon-16x16.png<?php echo $cache_buster; ?>">
+    <link rel="icon" type="image/png" sizes="32x32" href="<?php echo $base_path; ?>assets/images/favicon-32x32.png<?php echo $cache_buster; ?>">
+    <link rel="icon" type="image/png" sizes="96x96" href="<?php echo $favicon_96_path . $cache_buster; ?>">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="<?php echo $apple_touch_icon_path . $cache_buster; ?>">
+    <link rel="apple-touch-icon" sizes="152x152" href="<?php echo $base_path; ?>assets/images/apple-touch-icon-152x152.png<?php echo $cache_buster; ?>">
+    <link rel="apple-touch-icon" sizes="144x144" href="<?php echo $base_path; ?>assets/images/apple-touch-icon-144x144.png<?php echo $cache_buster; ?>">
+    <link rel="apple-touch-icon" sizes="120x120" href="<?php echo $base_path; ?>assets/images/apple-touch-icon-120x120.png<?php echo $cache_buster; ?>">
+    <link rel="apple-touch-icon" sizes="114x114" href="<?php echo $base_path; ?>assets/images/apple-touch-icon-114x114.png<?php echo $cache_buster; ?>">
+    <link rel="apple-touch-icon" sizes="76x76" href="<?php echo $base_path; ?>assets/images/apple-touch-icon-76x76.png<?php echo $cache_buster; ?>">
+    <link rel="apple-touch-icon" sizes="72x72" href="<?php echo $base_path; ?>assets/images/apple-touch-icon-72x72.png<?php echo $cache_buster; ?>">
+    <link rel="apple-touch-icon" sizes="60x60" href="<?php echo $base_path; ?>assets/images/apple-touch-icon-60x60.png<?php echo $cache_buster; ?>">
+    <link rel="apple-touch-icon" sizes="57x57" href="<?php echo $base_path; ?>assets/images/apple-touch-icon-57x57.png<?php echo $cache_buster; ?>">
+    
+    <!-- Android Chrome Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="<?php echo $base_path; ?>assets/images/android-chrome-192x192.png<?php echo $cache_buster; ?>">
+    <link rel="icon" type="image/png" sizes="512x512" href="<?php echo $base_path; ?>assets/images/android-chrome-512x512.png<?php echo $cache_buster; ?>">
+    
+    <!-- Modern Browsers (SVG comes after PNG) -->
+    <link rel="icon" type="image/svg+xml" href="<?php echo $favicon_svg_path . $cache_buster; ?>">
+    
+    <!-- Safari Pinned Tab -->
+    <link rel="mask-icon" href="<?php echo $base_path; ?>assets/images/safari-pinned-tab.svg" color="#0056b3">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="<?php echo $manifest_path . $cache_buster; ?>">
+    
+    <!-- Microsoft Tiles -->
+    <meta name="msapplication-TileImage" content="<?php echo $base_path; ?>assets/images/mstile-144x144.png">
+    <meta name="msapplication-TileColor" content="#0056b3">
+    <meta name="msapplication-config" content="<?php echo $base_path; ?>assets/images/browserconfig.xml">
+    
     <!-- SEO Meta Tags -->
-    <title><?php echo isset($page_title) ? $page_title . ' - ' . SITE_NAME : SITE_NAME; ?></title>
-    <meta name="description" content="<?php echo isset($meta_description) ? $meta_description : 'Berekke Website - A comprehensive digital platform for Sri Lankan Police officers with legal documents, tools, and resources.'; ?>">
+    <meta name="description" content="<?php echo isset($meta_description) ? htmlspecialchars($meta_description) : 'Berekke Website - A comprehensive digital platform for Sri Lankan Police officers with legal documents, tools, and resources.'; ?>">
     <meta name="keywords" content="Sri Lankan Police, Legal Documents, Penal Code, Criminal Procedure Code, Evidence Ordinance, Police Tools, Law Enforcement">
     <meta name="author" content="Berekke Development Team">
     <meta name="robots" content="index, follow">
     
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="<?php echo isset($page_title) ? $page_title . ' - ' . SITE_NAME : SITE_NAME; ?>">
-    <meta property="og:description" content="<?php echo isset($meta_description) ? $meta_description : 'A comprehensive digital platform for Sri Lankan Police officers'; ?>">
+    <meta property="og:title" content="<?php echo isset($page_title) ? htmlspecialchars($page_title) . ' - ' . SITE_NAME : SITE_NAME; ?>">
+    <meta property="og:description" content="<?php echo isset($meta_description) ? htmlspecialchars($meta_description) : 'A comprehensive digital platform for Sri Lankan Police officers'; ?>">
     <meta property="og:type" content="website">
     <meta property="og:url" content="<?php echo SITE_URL . $_SERVER['REQUEST_URI']; ?>">
     <meta property="og:image" content="<?php echo SITE_URL . '/' . $logo_path; ?>">
@@ -94,27 +141,19 @@ $current_page = basename($_SERVER['PHP_SELF']);
     
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="<?php echo isset($page_title) ? $page_title . ' - ' . SITE_NAME : SITE_NAME; ?>">
-    <meta name="twitter:description" content="<?php echo isset($meta_description) ? $meta_description : 'A comprehensive digital platform for Sri Lankan Police officers'; ?>">
+    <meta name="twitter:title" content="<?php echo isset($page_title) ? htmlspecialchars($page_title) . ' - ' . SITE_NAME : SITE_NAME; ?>">
+    <meta name="twitter:description" content="<?php echo isset($meta_description) ? htmlspecialchars($meta_description) : 'A comprehensive digital platform for Sri Lankan Police officers'; ?>">
     <meta name="twitter:image" content="<?php echo SITE_URL . '/' . $logo_path; ?>">
-    
-    <!-- Favicon and App Icons -->
-    <link rel="icon" type="image/x-icon" href="<?php echo $favicon_path; ?>">
-    <link rel="icon" type="image/svg+xml" href="<?php echo $favicon_svg_path; ?>">
-    <link rel="apple-touch-icon" sizes="180x180" href="<?php echo $apple_touch_icon_path; ?>">
-    <link rel="icon" type="image/png" sizes="96x96" href="<?php echo $favicon_96_path; ?>">
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="<?php echo $manifest_path; ?>">
     
     <!-- Mobile App Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Berekke">
+    <meta name="application-name" content="Berekke">
     <meta name="theme-color" content="#0056b3">
-    <meta name="msapplication-TileColor" content="#0056b3">
     <meta name="msapplication-navbutton-color" content="#0056b3">
+    <meta name="msapplication-tooltip" content="Berekke - Sri Lankan Police Platform">
     
     <!-- Preconnect for Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -123,7 +162,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     
     <!-- AdSense Preconnect (when enabled) -->
-    <?php if (shouldShowAds()): ?>
+    <?php if (function_exists('shouldShowAds') && shouldShowAds()): ?>
     <link rel="preconnect" href="https://pagead2.googlesyndication.com">
     <link rel="preconnect" href="https://googleads.g.doubleclick.net">
     <link rel="preconnect" href="https://partner.googleadservices.com">
@@ -135,7 +174,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
     
     <!-- Google AdSense -->
-    <?php echo getAdSenseScript(); ?>
+    <?php if (function_exists('getAdSenseScript')) echo getAdSenseScript(); ?>
     
     <!-- Stylesheets -->
     <!-- Bootstrap CSS -->
@@ -148,7 +187,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5f7bSF2oxou6wEb+I/lqeaKV5FDIfMvvRp772y4jcJLKuGUOpbJMdg/BTl50fJYAw==" crossorigin="anonymous">
     
     <!-- AdSense CSS -->
-    <?php echo getAdSenseCSS(); ?>
+    <?php if (function_exists('getAdSenseCSS')) echo getAdSenseCSS(); ?>
     
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
@@ -166,7 +205,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     </script>
     
     <!-- AdSense Auto Ads -->
-    <?php echo getAutoAdsCode(); ?>
+    <?php if (function_exists('getAutoAdsCode')) echo getAutoAdsCode(); ?>
     
     <style>
         :root {
@@ -437,7 +476,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     </div>
 
     <!-- Header Ad -->
-    <?php if (shouldShowAds() && !$is_admin): ?>
+    <?php if (function_exists('shouldShowAds') && shouldShowAds() && !$is_admin): ?>
     <div class="header-ad">
         <?php echo showHeaderAd(); ?>
     </div>
@@ -601,7 +640,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     </nav>
 
     <!-- Mobile Ad (Fixed Bottom) -->
-    <?php if (shouldShowAds()): ?>
+    <?php if (function_exists('shouldShowAds') && shouldShowAds()): ?>
     <div class="mobile-ad">
         <?php echo showMobileAd(); ?>
     </div>
@@ -613,7 +652,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             crossorigin="anonymous"></script>
     
     <!-- AdSense Ad Blocker Detection -->
-    <?php echo getAdBlockerDetectionScript(); ?>
+    <?php if (function_exists('getAdBlockerDetectionScript')) echo getAdBlockerDetectionScript(); ?>
     
     <script>
         // Enhanced Theme Toggle Functionality
@@ -722,6 +761,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 }
             });
         });
+        
+        // Debug favicon loading
+        console.log('Favicon path:', '<?php echo $favicon_path; ?>');
+        console.log('Base path:', '<?php echo $base_path; ?>');
     </script>
 </body>
 </html>

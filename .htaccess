@@ -1,2 +1,13 @@
 DirectoryIndex index.php index.html
 Options -Indexes
+# Favicon expires headers
+<IfModule mod_expires.c>
+    ExpiresActive on
+    ExpiresByType image/x-icon "access plus 1 week"
+    ExpiresByType image/vnd.microsoft.icon "access plus 1 week"
+</IfModule>
+
+# Correct MIME types
+AddType image/x-icon .ico
+AddType image/png .png
+AddType application/manifest+json .webmanifest

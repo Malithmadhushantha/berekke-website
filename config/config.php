@@ -7,8 +7,12 @@ define('DB_PASS', '');
 
 // Site Configuration
 define('SITE_NAME', 'Berekke Website');
-define('SITE_URL', 'http://localhost/berekke_website');
+define('SITE_URL', 'http://localhost/berekke-website');
 define('ADMIN_EMAIL', 'admin@berekke.lk');
+
+
+// Environment setting (for cache busting)
+define('ENVIRONMENT', 'development'); // Change to 'production' when live
 
 // Upload directories
 define('UPLOAD_PATH', 'uploads/');

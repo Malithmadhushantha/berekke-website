@@ -1,86 +1,112 @@
 {
-  "name": "Berekke Website - Sri Lankan Police Platform",
-  "short_name": "Berekke",
-  "description": "A comprehensive digital platform for Sri Lankan Police officers with legal documents, tools, and resources.",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0056b3",
-  "orientation": "portrait-primary",
-  "scope": "/",
-  "lang": "si",
-  "dir": "ltr",
-  "categories": ["government", "utilities", "productivity"],
-  "icons": [
-    {
-      "src": "web-app-manifest-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "web-app-manifest-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "apple-touch-icon.png",
-      "sizes": "180x180",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "favicon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Penal Code",
-      "short_name": "Penal Code",
-      "description": "Access Sri Lankan Penal Code",
-      "url": "/penal_code.php",
-      "icons": [
+    "name": "Berekke Website - Sri Lankan Police Platform",
+    "short_name": "Berekke",
+    "description": "A comprehensive digital platform for Sri Lankan Police officers with legal documents, tools, and resources.",
+    "icons": [
         {
-          "src": "favicon-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Police Tools",
-      "short_name": "Tools",
-      "description": "Access Police Tools and Resources",
-      "url": "/ai_tools.php",
-      "icons": [
+            "src": "android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
         {
-          "src": "favicon-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Downloads",
-      "short_name": "Downloads",
-      "description": "Download Police Resources",
-      "url": "/downloads.php",
-      "icons": [
+            "src": "android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
         {
-          "src": "favicon-96x96.png",
-          "sizes": "96x96"
+            "src": "web-app-manifest-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "web-app-manifest-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        },
+        {
+            "src": "favicon-96x96.png",
+            "sizes": "96x96",
+            "type": "image/png"
         }
-      ]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "logo.png",
-      "type": "image/png",
-      "sizes": "1280x720",
-      "form_factor": "wide"
-    }
-  ]
+    ],
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#0056b3",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "lang": "si",
+    "dir": "ltr",
+    "categories": ["government", "utilities", "productivity"],
+    "screenshots": [
+        {
+            "src": "screenshot-desktop.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide"
+        },
+        {
+            "src": "screenshot-mobile.png",
+            "sizes": "375x667",
+            "type": "image/png",
+            "form_factor": "narrow"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Penal Code",
+            "short_name": "Penal Code",
+            "description": "Access Sri Lankan Penal Code",
+            "url": "/penal_code.php",
+            "icons": [
+                {
+                    "src": "favicon-96x96.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "Criminal Procedure",
+            "short_name": "Criminal Procedure",
+            "description": "Access Criminal Procedure Code",
+            "url": "/criminal_procedure_code_act.php",
+            "icons": [
+                {
+                    "src": "favicon-96x96.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "Evidence Ordinance",
+            "short_name": "Evidence",
+            "description": "Access Evidence Ordinance",
+            "url": "/evidence_ordinance.php",
+            "icons": [
+                {
+                    "src": "favicon-96x96.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "AI Tools",
+            "short_name": "AI Tools",
+            "description": "Access AI-powered tools",
+            "url": "/ai_tools.php",
+            "icons": [
+                {
+                    "src": "favicon-96x96.png",
+                    "sizes": "96x96"
+                }
+            ]
+        }
+    ]
 }

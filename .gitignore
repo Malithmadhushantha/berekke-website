@@ -1,0 +1,4 @@
+config/config.php
+# Ignore the configuration file
+config/database.php
+# Ignore the database configuration file

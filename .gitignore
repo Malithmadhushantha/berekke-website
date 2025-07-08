@@ -4,4 +4,6 @@ config/database.php
 favicon_generator.php
 config.php
 .htaccess
+config/config.php
+
 # Ignore the database configuration file

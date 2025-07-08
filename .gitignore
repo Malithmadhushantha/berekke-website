@@ -5,5 +5,8 @@ favicon_generator.php
 config.php
 .htaccess
 config/config.php
+includes/header.php
+
+
 
 # Ignore the database configuration file

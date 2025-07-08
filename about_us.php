@@ -399,7 +399,7 @@ A special platform created to improve the efficiency of the legal sector in toda
                                             <br>
                                             <cite title="Position"><?php echo htmlspecialchars($testimonial['position']); ?></cite>
                                             <?php if (!empty($testimonial['organization'])): ?>
-                                            <br><small class="text-muted"><?php echo htmlspecialchars($testimonial['organization']); ?></small>
+                                            <br><small class="text-white"><?php echo htmlspecialchars($testimonial['organization']); ?></small>
                                             <?php endif; ?>
                                         </footer>
                                     </div>
